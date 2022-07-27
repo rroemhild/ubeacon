@@ -5,10 +5,8 @@ AltBeacon Protocol Specification: https://github.com/AltBeacon/spec
 from binascii import hexlify
 from micropython import const
 
+from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA
 
-_FLAGS_DATA = const(0x06)  # Discoverable, without BR/EDR support
-_FLAGS_TYPE = const(0x01)
-_FLAGS_LENGHT = const(0x02)
 
 # Type representing the Manufacturer Specific advertising data structure.
 _AD_TYPE = const(0xFF)
@@ -29,7 +27,7 @@ _MFG_RESERVED = const(0x00)
 _REFERENCE_RSSI = const(0xBA)
 
 
-class AltBeacon:
+class AltBeacon(Beacon):
     def __init__(
         self,
         beacon_id_ou,  # 16-bytes
@@ -44,17 +42,13 @@ class AltBeacon:
         self.mfg_reserved = mfg_reserved
         self.reference_rssi = reference_rssi
 
-    def __str__(self):
-        adv = self.adv_bytes
-        return "bytes: {:d} data: {:s}".format(len(adv), hexlify(adv))
-
     @property
     def adv(self):
         return (
             [
-                _FLAGS_LENGHT,
-                _FLAGS_TYPE,
-                _FLAGS_DATA,
+                FLAGS_LENGHT,
+                FLAGS_TYPE,
+                FLAGS_DATA,
                 _AD_LENGHT,
                 _AD_TYPE,
             ]
@@ -67,7 +61,3 @@ class AltBeacon:
                 self.mfg_reserved,
             ]
         )
-
-    @property
-    def adv_bytes(self):
-        return bytes(self.adv)

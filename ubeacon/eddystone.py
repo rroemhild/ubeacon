@@ -5,10 +5,8 @@ Eddystone Protocol Specification: https://github.com/google/eddystone
 from binascii import hexlify
 from micropython import const
 
+from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA
 
-_FLAGS_DATA = const(0x06)  # Discoverable, without BR/EDR support
-_FLAGS_TYPE = const(0x01)
-_FLAGS_LENGHT = const(0x02)
 
 # A 1-byte value representing the average received signal strength at 0m from the advertiser
 _REFERENCE_RSSI = const(0xD1)
@@ -43,17 +41,7 @@ DOT_BIZ = const(0x0C)
 DOT_GOV = const(0x0D)
 
 
-class _Eddystone:
-    def __str__(self):
-        adv = self.adv_bytes
-        return "bytes: {:d} data: {:s}".format(len(adv), hexlify(adv))
-
-    @property
-    def adv_bytes(self):
-        return bytes(self.adv)
-
-
-class EddystoneUID(_Eddystone):
+class EddystoneUID(Beacon):
     def __init__(
         self,
         namespace_id,  # 10-bytes
@@ -68,9 +56,9 @@ class EddystoneUID(_Eddystone):
     def adv(self):
         return (
             [
-                _FLAGS_LENGHT,
-                _FLAGS_TYPE,
-                _FLAGS_DATA,
+                FLAGS_LENGHT,
+                FLAGS_TYPE,
+                FLAGS_DATA,
                 _SERVICE_LENGTH,
                 _SERVICE_UUID_TYPES,
             ]
@@ -93,7 +81,7 @@ class EddystoneUID(_Eddystone):
         )
 
 
-class EddystoneURL(_Eddystone):
+class EddystoneURL(Beacon):
     def __init__(
         self,
         url,
@@ -115,9 +103,9 @@ class EddystoneURL(_Eddystone):
 
         adv = (
             [
-                _FLAGS_LENGHT,
-                _FLAGS_TYPE,
-                _FLAGS_DATA,
+                FLAGS_LENGHT,
+                FLAGS_TYPE,
+                FLAGS_DATA,
                 _SERVICE_LENGTH,
                 _SERVICE_UUID_TYPES,
             ]
