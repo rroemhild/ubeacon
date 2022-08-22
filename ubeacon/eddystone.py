@@ -2,6 +2,7 @@
 Eddystone Protocol Specification: https://github.com/google/eddystone
 """
 
+from struct import pack, unpack
 from binascii import hexlify
 from micropython import const
 
@@ -21,36 +22,48 @@ _EDDYSTONE_FRAME_TYPE_URL = const(0x10)
 _EDDYSTONE_RESERVED = const(0x00)
 _EDDYSTONE_SERVICE_DATA = const(0x16)
 
-HTTP_WWW = const(0x00)
-HTTPS_WWW = const(0x01)
-HTTP = const(0x02)
-HTTPS = const(0x03)
-DOT_COM_SLASH = const(0x00)
-DOT_ORG_SLASH = const(0x01)
-DOT_EDU_SLASH = const(0x02)
-DOT_NET_SLASH = const(0x03)
-DOT_INFO_SLASH = const(0x04)
-DOT_BIZ_SLASH = const(0x05)
-DOT_GOV_SLASH = const(0x06)
-DOT_COM = const(0x07)
-DOT_ORG = const(0x08)
-DOT_EDU = const(0x09)
-DOT_NET = const(0x0A)
-DOT_INFO = const(0x0B)
-DOT_BIZ = const(0x0C)
-DOT_GOV = const(0x0D)
+_URL_SCHEME = (
+    b"http://www.",
+    b"https://www.",
+    b"http://",
+    b"https://",
+)
+
+_URL_TLD = (
+    b".com/",
+    b".org/",
+    b".edu/",
+    b".net/",
+    b".info/",
+    b".biz/",
+    b".gov/",
+    b".com",
+    b".org",
+    b".edu",
+    b".net",
+    b".info",
+    b".biz",
+    b".gov",
+)
 
 
 class EddystoneUID(Beacon):
     def __init__(
         self,
-        namespace_id,  # 10-bytes
-        instance_id,  # 6-bytes
+        namespace_id=None,  # 10-bytes
+        instance_id=None,  # 6-bytes
         reference_rssi=_REFERENCE_RSSI,  # 1-byte
+        *,
+        adv_data=None,
     ):
-        self.namespace_id = namespace_id
-        self.instance_id = instance_id
-        self.reference_rssi = reference_rssi
+        if adv_data:
+            self.decode(adv_data)
+        elif namespace_id and instance_id:
+            self.namespace_id = namespace_id
+            self.instance_id = instance_id
+            self.reference_rssi = reference_rssi
+        else:
+            raise ValueError("Could not initialize beacon")
 
     @property
     def adv(self):
@@ -80,28 +93,42 @@ class EddystoneUID(Beacon):
             ]
         )
 
+    def decode(self, adv_data):
+        self.reference_rssi = unpack("!b", bytes([adv_data[9]]))[0]
+        self.namespace_id = adv_data[10:20]
+        self.instance_id = adv_data[20:26]
+
 
 class EddystoneURL(Beacon):
-    def __init__(
-        self,
-        url,
-        url_prefix=HTTPS,
-        url_tld=None,
-        reference_rssi=_REFERENCE_RSSI,
-    ):
-        self.url = url
-        self.url_prefix = url_prefix
-        self.url_tld = url_tld
-        self.reference_rssi = reference_rssi
+    def __init__(self, url=None, reference_rssi=_REFERENCE_RSSI, *, adv_data=None):
+        if adv_data:
+            self.decode(adv_data)
+        elif url:
+            self.url = url
+            self.reference_rssi = reference_rssi
+        else:
+            raise ValueError("Could not initialize beacon")
 
     @property
     def adv(self):
-        if self.url_tld:
-            url_lenght = 6 + len(self.url) + 1
-        else:
-            url_lenght = 6 + len(self.url)
+        url = self.url
+        url_scheme = 3
 
-        adv = (
+        # Set URL scheme
+        for key, val in enumerate(_URL_SCHEME):
+            if url.startswith(val):
+                url = url.replace(val, b"")
+                url_scheme = key
+
+        # Find and replace top level domain
+        for key, val in enumerate(_URL_TLD):
+            if val in url:
+                url = url.replace(val, bytes([key]))
+
+        # Length is URL length plus first 6 bytes from Eddystone URL frame
+        url_frame_lenght = len(url) + 6
+
+        return (
             [
                 FLAGS_LENGHT,
                 FLAGS_TYPE,
@@ -111,19 +138,33 @@ class EddystoneURL(Beacon):
             ]
             + [x for x in _EDDYSTONE_UUID]
             + [
-                url_lenght,
+                url_frame_lenght,
                 _EDDYSTONE_SERVICE_DATA,
             ]
             + [x for x in _EDDYSTONE_UUID]
             + [
                 _EDDYSTONE_FRAME_TYPE_URL,
                 self.reference_rssi,
-                self.url_prefix,
+                url_scheme,
             ]
-            + [x for x in self.url]
+            + [x for x in url]
         )
 
-        if self.url_tld is not None:
-            adv.append(self.url_tld)
+    def decode(self, adv_data):
+        url = b""
 
-        return adv
+        # Only Eddystone URL frame
+        adv_data = adv_data[4:]
+        frame_length = adv_data[0]
+
+        # Join the URL together
+        url += _URL_SCHEME[adv_data[6]]
+        url += adv_data[7 : frame_length + 1]
+
+        # Replace TLD ID if any
+        for byte in url:
+            if byte <= 13:
+                url = url.replace(bytes([byte]), _URL_TLD[byte])
+
+        self.url = url
+        self.reference_rssi = unpack("!b", bytes([adv_data[5]]))[0]

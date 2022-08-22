@@ -2,6 +2,7 @@
 iBeacon Protocol Specification: https://developer.apple.com/ibeacon/
 """
 
+from struct import pack, unpack
 from binascii import hexlify
 from micropython import const
 
@@ -26,15 +27,22 @@ _REFERENCE_RSSI = const(0xBA)
 class iBeacon(Beacon):
     def __init__(
         self,
-        uuid,  # 16-bytes
-        major,  # 2-bytes
-        minor,  # 2-bytes
+        uuid=None,  # 16-bytes
+        major=None,  # 2-bytes
+        minor=None,  # 2-bytes
         reference_rssi=_REFERENCE_RSSI,
+        *,
+        adv_data=None
     ):
-        self.uuid = uuid
-        self.major = major
-        self.minor = minor
-        self.reference_rssi = reference_rssi
+        if adv_data:
+            self.decode(adv_data)
+        elif uuid and major and minor:
+            self.uuid = uuid
+            self.major = major
+            self.minor = minor
+            self.reference_rssi = reference_rssi
+        else:
+            raise ValueError("Could not initialize beacon")
 
     @property
     def adv(self):
@@ -56,3 +64,9 @@ class iBeacon(Beacon):
                 0x00,
             ]
         )
+
+    def decode(self, adv_data):
+        self.uuid = adv_data[6:22]
+        self.major = adv_data[22:24]
+        self.minor = adv_data[24:26]
+        self.reference_rssi = unpack("!b", bytes([adv_data[26]]))[0]

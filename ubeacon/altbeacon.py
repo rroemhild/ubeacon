@@ -2,6 +2,7 @@
 AltBeacon Protocol Specification: https://github.com/AltBeacon/spec
 """
 
+from struct import pack, unpack
 from binascii import hexlify
 from micropython import const
 
@@ -30,17 +31,24 @@ _REFERENCE_RSSI = const(0xBA)
 class AltBeacon(Beacon):
     def __init__(
         self,
-        beacon_id_ou,  # 16-bytes
-        beacon_id_uc,  # 4-bytes
-        mfg_id=_MFG_ID,  # 1-byte
+        beacon_id_ou=None,  # 16-bytes
+        beacon_id_uc=None,  # 4-bytes
+        mfg_id=_MFG_ID,  # 2-byte
         reference_rssi=_REFERENCE_RSSI,  # 1-byte
         mfg_reserved=_MFG_RESERVED,  # 1-byte
+        *,
+        adv_data=None,
     ):
-        self.mfg_id = mfg_id
-        self.beacon_id_ou = beacon_id_ou
-        self.beacon_id_uc = beacon_id_uc
-        self.mfg_reserved = mfg_reserved
-        self.reference_rssi = reference_rssi
+        if adv_data:
+            self.decode(adv_data)
+        elif beacon_id_ou and beacon_id_uc:
+            self.mfg_id = mfg_id
+            self.beacon_id_ou = beacon_id_ou
+            self.beacon_id_uc = beacon_id_uc
+            self.mfg_reserved = mfg_reserved
+            self.reference_rssi = reference_rssi
+        else:
+            raise ValueError("Could not initialize beacon")
 
     @property
     def adv(self):
@@ -61,3 +69,10 @@ class AltBeacon(Beacon):
                 self.mfg_reserved,
             ]
         )
+
+    def decode(self, adv_data):
+        self.beacon_id_ou = adv_data[6:22]
+        self.beacon_id_uc = adv_data[22:26]
+        self.mfg_id = adv_data[2:4]
+        self.reference_rssi = unpack("!b", bytes([adv_data[26]]))[0]
+        self.mfg_reserved = adv_data[27]
