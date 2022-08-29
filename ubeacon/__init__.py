@@ -6,9 +6,14 @@ FLAGS_DATA = const(0x06)  # Discoverable, without BR/EDR support
 FLAGS_TYPE = const(0x01)
 FLAGS_LENGHT = const(0x02)
 
+# Advertising interval default
 ADV_INTERVAL_MS = 250_000
 
-_ADV_TYPE_NAME = const(0x09)
+# ADV data frame  type for the manufacturer specific ADV data structure
+ADV_TYPE_MFG_DATA = const(0xFF)
+
+# ADV data frame Frame type for complete local name
+_ADV_TYPE_COMPLETE_NAME = const(0x09)
 
 
 class Beacon:
@@ -33,7 +38,7 @@ class Beacon:
             FLAGS_TYPE,
             FLAGS_DATA,
             len(self.name) + 1,
-            _ADV_TYPE_NAME,
+            _ADV_TYPE_COMPLETE_NAME,
         ] + [x for x in self.name]
 
     @property

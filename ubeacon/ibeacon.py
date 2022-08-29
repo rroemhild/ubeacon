@@ -6,19 +6,17 @@ from struct import pack, unpack
 from binascii import hexlify
 from micropython import const
 
-from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA
+from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, ADV_TYPE_MFG_DATA
 
-
-# Type representing the Manufacturer Specific advertising data structure.
-_AD_TYPE = const(0xFF)
-
-# Length of the type and data portion of the Manufacturer Specific advertising data structure.
-_AD_LENGHT = const(0x1A)
-
-_BEACON_TYPE = bytes([0x02, 0x15])
 
 # The beacon device manufacturer's company identifier code.
-_MFG_ID = bytes([0x4C, 0x00])
+_COMPANY_ID = bytes([0x4C, 0x00])
+
+# iBeacon advertisement code
+_DEVICE_TYPE = bytes([0x02, 0x15])
+
+# Length of the data frame from the manufacturer specific ADV data structure.
+_ADV_LENGHT = const(0x1A)
 
 # A 1-byte value representing the average received signal strength at 1m from the advertiser
 _REFERENCE_RSSI = const(0xBA)
@@ -51,11 +49,11 @@ class iBeacon(Beacon):
                 FLAGS_LENGHT,
                 FLAGS_TYPE,
                 FLAGS_DATA,
-                _AD_LENGHT,
-                _AD_TYPE,
+                _ADV_LENGHT,
+                ADV_TYPE_MFG_DATA,
             ]
-            + [x for x in _MFG_ID]
-            + [x for x in _BEACON_TYPE]
+            + [x for x in _COMPANY_ID]
+            + [x for x in _DEVICE_TYPE]
             + [x for x in self.uuid]
             + [x for x in self.major]
             + [x for x in self.minor]
@@ -67,6 +65,6 @@ class iBeacon(Beacon):
 
     def decode(self, adv_data):
         self.uuid = adv_data[6:22]
-        self.major = adv_data[22:24]
-        self.minor = adv_data[24:26]
+        self.major = unpack("!H", adv_data[22:24])[0]
+        self.minor = unpack("!H" , adv_data[24:26])[0]
         self.reference_rssi = unpack("!b", bytes([adv_data[26]]))[0]
