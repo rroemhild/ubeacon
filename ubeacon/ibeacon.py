@@ -2,11 +2,18 @@
 iBeacon Protocol Specification: https://developer.apple.com/ibeacon/
 """
 
-from struct import pack, unpack
+from struct import unpack
 from binascii import hexlify
 from micropython import const
 
-from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, ADV_TYPE_MFG_DATA
+from . import (
+    Beacon,
+    FLAGS_LENGHT,
+    FLAGS_TYPE,
+    FLAGS_DATA,
+    ADV_TYPE_MFG_DATA,
+    uBeaconDecorators,
+)
 
 
 # The beacon device manufacturer's company identifier code.
@@ -18,17 +25,17 @@ _DEVICE_TYPE = bytes([0x02, 0x15])
 # Length of the data frame from the manufacturer specific ADV data structure.
 _ADV_LENGHT = const(0x1A)
 
-# A 1-byte value representing the average received signal strength at 1m from the advertiser
-_REFERENCE_RSSI = const(0xBA)
+# Value representing the average received signal strength at 1m from the advertiser
+_REFERENCE_RSSI = const(-70)
 
 
 class iBeacon(Beacon):
     def __init__(
         self,
         uuid=None,  # 16-bytes
-        major=None,  # 2-bytes
-        minor=None,  # 2-bytes
-        reference_rssi=_REFERENCE_RSSI,
+        major=None,  # 0 - 65535
+        minor=None,  # 0 - 65535
+        reference_rssi=_REFERENCE_RSSI,  # 1-byte
         *,
         adv_data=None
     ):
@@ -54,17 +61,17 @@ class iBeacon(Beacon):
             ]
             + [x for x in _COMPANY_ID]
             + [x for x in _DEVICE_TYPE]
-            + [x for x in self.uuid]
-            + [x for x in self.major]
-            + [x for x in self.minor]
+            + [x for x in self.validate(self.uuid, 16)]
+            + [x for x in self.validate(self.major, 2)]
+            + [x for x in self.validate(self.minor, 2)]
             + [
-                self.reference_rssi,
-                0x00,
+                self.validate(self.reference_rssi, 1)[0],
             ]
         )
 
+    @uBeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         self.uuid = adv_data[6:22]
         self.major = unpack("!H", adv_data[22:24])[0]
-        self.minor = unpack("!H" , adv_data[24:26])[0]
+        self.minor = unpack("!H", adv_data[24:26])[0]
         self.reference_rssi = unpack("!b", bytes([adv_data[26]]))[0]

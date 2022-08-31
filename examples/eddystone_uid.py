@@ -6,7 +6,7 @@ from ubeacon import ADV_INTERVAL_MS
 from ubeacon.eddystone import EddystoneUID
 
 
-NAMESPACE_ID = b"eddystone!"  # 10-bytes
+NAMESPACE_ID = b"Eddystone!"  # 10-bytes
 INSTANCE_ID = bytes([0, 0, 0, 0, 0, 1])  # 6-bytes
 
 

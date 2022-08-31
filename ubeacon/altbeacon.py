@@ -6,7 +6,14 @@ from struct import pack, unpack
 from binascii import hexlify
 from micropython import const
 
-from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, ADV_TYPE_MFG_DATA
+from . import (
+    Beacon,
+    FLAGS_LENGHT,
+    FLAGS_TYPE,
+    FLAGS_DATA,
+    ADV_TYPE_MFG_DATA,
+    uBeaconDecorators,
+)
 
 
 # Beacon device manufacturer's company identifier code.
@@ -23,7 +30,7 @@ _ADV_LENGHT = const(0x1B)
 _MFG_RESERVED = const(0x00)
 
 # A 1-byte value representing the average received signal strength at 1m from the advertiser
-_REFERENCE_RSSI = const(0xBA)
+_REFERENCE_RSSI = const(-70)
 
 
 class AltBeacon(Beacon):
@@ -58,16 +65,17 @@ class AltBeacon(Beacon):
                 _ADV_LENGHT,
                 ADV_TYPE_MFG_DATA,
             ]
-            + [x for x in self.company_id]
+            + [x for x in self.validate(self.company_id, 2)]
             + [x for x in _DEVICE_TYPE]
-            + [x for x in self.beacon_id_ou]
-            + [x for x in self.beacon_id_uc]
+            + [x for x in self.validate(self.beacon_id_ou, 16)]
+            + [x for x in self.validate(self.beacon_id_uc, 4)]
             + [
-                self.reference_rssi,
-                self.mfg_reserved,
+                self.validate(self.reference_rssi, 1)[0],
+                self.validate(self.mfg_reserved, 1)[0],
             ]
         )
 
+    @uBeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         self.beacon_id_ou = adv_data[6:22]
         self.beacon_id_uc = adv_data[22:26]

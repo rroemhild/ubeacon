@@ -6,11 +6,11 @@ from struct import pack, unpack
 from binascii import hexlify
 from micropython import const
 
-from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA
+from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, uBeaconDecorators
 
 
 # A 1-byte value representing the average received signal strength at 0m from the advertiser
-_REFERENCE_RSSI = const(0xD1)
+_REFERENCE_RSSI = const(-70)
 
 _SERVICE_LENGTH = const(0x03)
 _SERVICE_UUID_TYPES = const(0x03)
@@ -83,16 +83,17 @@ class EddystoneUID(Beacon):
             + [x for x in _EDDYSTONE_UUID]
             + [
                 _EDDYSTONE_FRAME_TYPE_UID,
-                self.reference_rssi,
+                self.validate(self.reference_rssi, 1)[0],
             ]
-            + [x for x in self.namespace_id]
-            + [x for x in self.instance_id]
+            + [x for x in self.validate(self.namespace_id, 10)]
+            + [x for x in self.validate(self.instance_id, 6)]
             + [
                 _EDDYSTONE_RESERVED,
                 _EDDYSTONE_RESERVED,
             ]
         )
 
+    @uBeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         self.reference_rssi = unpack("!b", bytes([adv_data[9]]))[0]
         self.namespace_id = adv_data[10:20]
@@ -114,7 +115,7 @@ class EddystoneURL(Beacon):
         url = self.url
         url_scheme = 3
 
-        # Set URL scheme
+        # Set URL scheme and remove scheme from url
         for key, val in enumerate(_URL_SCHEME):
             if url.startswith(val):
                 url = url.replace(val, b"")
@@ -144,12 +145,13 @@ class EddystoneURL(Beacon):
             + [x for x in _EDDYSTONE_UUID]
             + [
                 _EDDYSTONE_FRAME_TYPE_URL,
-                self.reference_rssi,
+                self.validate(self.reference_rssi, 1)[0],
                 url_scheme,
             ]
             + [x for x in url]
         )
 
+    @uBeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         url = b""
 

@@ -16,6 +16,19 @@ ADV_TYPE_MFG_DATA = const(0xFF)
 _ADV_TYPE_COMPLETE_NAME = const(0x09)
 
 
+class uBeaconDecorators:
+    @classmethod
+    def remove_adv_header(cls, decorated):
+        """Decorator to remove the ADV data flags header if any"""
+
+        def inner(cls, adv_data):
+            if adv_data[:2] == bytes([0x02, 0x01]):
+                adv_data = adv_data[3:]
+            decorated(cls, adv_data)
+
+        return inner
+
+
 class Beacon:
 
     name = b"uBeacon"
@@ -47,3 +60,19 @@ class Beacon:
 
     def decode(self, adv_data):
         raise NotImplementedError("No decode method in child class implemented")
+
+    @staticmethod
+    def validate(value, size: int) -> bytes:
+        value_bytes = b""
+
+        if isinstance(value, bytes):
+            value_bytes = value
+            if len(value_bytes) != size:
+                print(len(value_bytes))
+                raise ValueError("Value has to be {}-bytes long".format(size))
+        elif isinstance(value, int):
+            value_bytes = value.to_bytes(size, "big")
+        else:
+            raise ValueError("Value has to be int or bytes")
+
+        return value_bytes

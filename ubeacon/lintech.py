@@ -6,7 +6,14 @@ from struct import pack, unpack
 from binascii import hexlify
 from micropython import const
 
-from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, ADV_TYPE_MFG_DATA
+from . import (
+    Beacon,
+    FLAGS_LENGHT,
+    FLAGS_TYPE,
+    FLAGS_DATA,
+    ADV_TYPE_MFG_DATA,
+    uBeaconDecorators,
+)
 
 
 # The beacon device manufacturer's company identifier code.
@@ -18,8 +25,8 @@ _DEVICE_TYPE = bytes([0xFF, 0x03])
 # Length of the data frame from the manufacturer specific ADV data structure.
 _ADV_LENGHT = const(0x1B)
 
-# A 1-byte value representing the average received signal strength at 1m from the advertiser
-_REFERENCE_RSSI = const(0xC5)
+# Value representing the average received signal strength at 1m from the advertiser
+_REFERENCE_RSSI = const(-70)
 
 # LinTech Beacon Proximity UUID
 _PROXIMITY_UUID = bytes(
@@ -50,8 +57,9 @@ _TX_BAT_STATUS = const(0xFC)
 class LinTechBeacon(Beacon):
     def __init__(
         self,
-        major=None,  # 2-bytes
-        minor=None,  # 2-bytes
+        uuid=_PROXIMITY_UUID,  # 16-bytes
+        major=None,  # 0 - 65535
+        minor=None,  # 0 - 65535
         reference_rssi=_REFERENCE_RSSI,  # 1-byte
         *,
         adv_data=None,
@@ -59,6 +67,7 @@ class LinTechBeacon(Beacon):
         if adv_data:
             self.decode(adv_data)
         elif major and minor:
+            self.uuid = uuid
             self.major = major
             self.minor = minor
             self.reference_rssi = reference_rssi
@@ -75,17 +84,18 @@ class LinTechBeacon(Beacon):
                 _ADV_LENGHT,
                 ADV_TYPE_MFG_DATA,
             ]
-            + [x for x in COMPANY_ID]
-            + [x for x in DEVICE_TYPE]
-            + [x for x in self.uuid]
-            + [x for x in self.major]
-            + [x for x in self.minor]
+            + [x for x in _COMPANY_ID]
+            + [x for x in _DEVICE_TYPE]
+            + [x for x in self.validate(self.uuid, 16)]
+            + [x for x in self.validate(self.major, 2)]
+            + [x for x in self.validate(self.minor, 2)]
             + [
-                self.reference_rssi,
+                self.validate(self.reference_rssi, 1)[0],
                 _TX_BAT_STATUS,
             ]
         )
 
+    @uBeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         self.major = unpack("!H", adv_data[22:24])[0]
         self.minor = unpack("!H", adv_data[24:26])[0]
