@@ -1,3 +1,4 @@
+from machine import unique_id
 from binascii import hexlify
 from micropython import const
 
@@ -28,7 +29,8 @@ class uBeaconDecorators:
 
 class Beacon:
 
-    name = b"uBeacon"
+    # Use the Wifi MAC address to get a 2-byte unique id
+    name = b"uBeacon " + hexlify(unique_id()[4:]).upper()
 
     def __str__(self):
         adv = self.adv_bytes

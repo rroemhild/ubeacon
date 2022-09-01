@@ -16,7 +16,6 @@ def main():
     ble.active(True)
 
     beacon = EddystoneUID(NAMESPACE_ID, INSTANCE_ID)
-    beacon.name = b"uBeacon " + hexlify(ble.config("mac")[1][4:]).upper()
 
     ble.gap_advertise(
         ADV_INTERVAL_MS,
