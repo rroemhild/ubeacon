@@ -47,7 +47,7 @@ class AltBeacon(Beacon):
         if adv_data:
             self.decode(adv_data)
         elif beacon_id_ou and beacon_id_uc:
-            self.company_id = _COMPANY_ID
+            self.company_id = company_id
             self.beacon_id_ou = beacon_id_ou
             self.beacon_id_uc = beacon_id_uc
             self.mfg_reserved = mfg_reserved
