@@ -2,12 +2,13 @@ import bluetooth
 
 from binascii import hexlify
 
-from ubeacon import ADV_INTERVAL_MS
 from ubeacon.eddystone import EddystoneUID
 
 
 NAMESPACE_ID = b"Eddystone!"  # 10-bytes
 INSTANCE_ID = bytes([0, 0, 0, 0, 0, 1])  # 6-bytes
+
+ADV_INTERVAL_MS = 250_000
 
 
 def main():

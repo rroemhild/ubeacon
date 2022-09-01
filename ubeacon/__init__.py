@@ -6,9 +6,6 @@ FLAGS_DATA = const(0x06)  # Discoverable, without BR/EDR support
 FLAGS_TYPE = const(0x01)
 FLAGS_LENGHT = const(0x02)
 
-# Advertising interval default
-ADV_INTERVAL_MS = 250_000
-
 # ADV data frame  type for the manufacturer specific ADV data structure
 ADV_TYPE_MFG_DATA = const(0xFF)
 

@@ -2,12 +2,13 @@ import bluetooth
 
 from binascii import hexlify
 
-from ubeacon import ADV_INTERVAL_MS
 from ubeacon.altbeacon import AltBeacon
 
 
 BEACON_ID_ORG_UNIT = b"MicroPython BLE!"  # 16-bytes
 BEACON_ID_USE_CASE = bytes([21, 0, 0, 1])  # 4-bytes
+
+ADV_INTERVAL_MS = 250_000
 
 
 def main():

@@ -2,11 +2,12 @@ import bluetooth
 
 from binascii import hexlify
 
-from ubeacon import ADV_INTERVAL_MS
 from ubeacon.eddystone import EddystoneURL
 
 
 URL = b"https://micropython.com"
+
+ADV_INTERVAL_MS = 250_000
 
 
 def main():

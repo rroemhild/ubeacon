@@ -2,13 +2,14 @@ import bluetooth
 
 from binascii import hexlify
 
-from ubeacon import ADV_INTERVAL_MS
 from ubeacon.ibeacon import iBeacon
 
 
 UUID = bytes([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 21, 42])  # 16-bytes
 MAJOR = 42  # 0 - 65535
 MINOR = 21  # 0 - 65535
+
+ADV_INTERVAL_MS = 250_000
 
 
 def main():
