@@ -97,6 +97,7 @@ class LinTechBeacon(Beacon):
 
     @uBeaconDecorators.remove_adv_header
     def decode(self, adv_data):
+        self.uuid = adv_data[6:22]
         self.major = unpack("!H", adv_data[22:24])[0]
         self.minor = unpack("!H", adv_data[24:26])[0]
         self.reference_rssi = unpack("!b", bytes([adv_data[26]]))[0]
