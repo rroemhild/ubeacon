@@ -1,4 +1,5 @@
-from machine import unique_id
+import sys
+
 from binascii import hexlify
 from micropython import const
 
@@ -12,6 +13,23 @@ ADV_TYPE_MFG_DATA = const(0xFF)
 
 # ADV data frame Frame type for complete local name
 _ADV_TYPE_COMPLETE_NAME = const(0x09)
+
+
+def _unique_id():
+    if sys.platform == "linux":
+        return b"LINUX"
+    elif sys.platform == "esp32":
+        import bluetooth
+
+        ble = bluetooth.BLE()
+        ble.active(True)
+        id = ble.config("mac")[1][4:]
+        ble.active(False)
+        return hexlify(id).upper()
+    elif sys.platform.endswith("Py"):  # PyCom
+        import machine
+
+        return hexlify(machine.unique_id()[4:]).upper()
 
 
 class uBeaconDecorators:
@@ -30,7 +48,7 @@ class uBeaconDecorators:
 class Beacon:
 
     # Use the Wifi MAC address to get a 2-byte unique id
-    name = b"uBeacon " + hexlify(unique_id()[4:]).upper()
+    name = b"uBeacon " + _unique_id()
 
     def __str__(self):
         adv = self.adv_bytes
@@ -67,7 +85,6 @@ class Beacon:
         if isinstance(value, bytes):
             value_bytes = value
             if len(value_bytes) != size:
-                print(len(value_bytes))
                 raise ValueError("Value has to be {}-bytes long".format(size))
         elif isinstance(value, int):
             value_bytes = value.to_bytes(size, "big")
