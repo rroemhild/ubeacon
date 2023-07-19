@@ -4,7 +4,6 @@ import bluetooth
 
 from ubinascii import hexlify
 
-from ubeacon import uBeaconDecorators
 from ubeacon.lintech import LinTechBeacon
 from ubeacon.ibeacon import iBeacon
 from ubeacon.ruuvitag import RuuviTag
@@ -64,4 +63,7 @@ async def scan():
 
 
 if __name__ == "__main__":
-    asyncio.run(scan())
+    try:
+        asyncio.run(scan())
+    except KeyboardInterrupt:
+        aioble.stop()

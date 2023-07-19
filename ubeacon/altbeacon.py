@@ -39,8 +39,8 @@ class AltBeacon(Beacon):
         beacon_id_ou=None,  # 16-bytes
         beacon_id_uc=None,  # 4-bytes
         company_id=_COMPANY_ID,  # 2-byte
-        reference_rssi=_REFERENCE_RSSI,  # 1-byte
-        mfg_reserved=_MFG_RESERVED,  # 1-byte
+        reference_rssi=_REFERENCE_RSSI,
+        mfg_reserved=_MFG_RESERVED,
         *,
         adv_data=None,
     ):
