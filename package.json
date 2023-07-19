@@ -1,0 +1,12 @@
+{
+  "urls": [
+    ["ubeacon/__init__.py", "github:rroemhild/ubeacon/ubeacon/__init__.py"],
+    ["ubeacon/altbeacon.py", "github:rroemhild/ubeacon/ubeacon/altbeacon.py"],
+    ["ubeacon/eddystone.py", "github:rroemhild/ubeacon/ubeacon/eddystone.py"],
+    ["ubeacon/ibeacon.py", "github:rroemhild/ubeacon/ubeacon/ibeacon.py"],
+    ["ubeacon/lintech.py", "github:rroemhild/ubeacon/ubeacon/lintech.py"],
+    ["ubeacon/ruuvitag.py", "github:rroemhild/ubeacon/ubeacon/ruuvitag.py"]
+  ],
+  "deps": [],
+  "version": "0.1.0"
+}
