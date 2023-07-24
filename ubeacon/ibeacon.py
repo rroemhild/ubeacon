@@ -12,7 +12,7 @@ from . import (
     FLAGS_TYPE,
     FLAGS_DATA,
     ADV_TYPE_MFG_DATA,
-    uBeaconDecorators,
+    ubeaconDecorators,
 )
 
 
@@ -39,18 +39,22 @@ class iBeacon(Beacon):
         *,
         adv_data=None
     ):
+        # If adv_data is provided, decode it to initialize the beacon
         if adv_data:
             self.decode(adv_data)
+        # If uuid, major and minor are provided, use them to initialize the beacon
         elif uuid and major and minor:
             self.uuid = uuid
             self.major = major
             self.minor = minor
             self.reference_rssi = reference_rssi
         else:
+            # If neither adv_data nor required values are provided, raise an error
             raise ValueError("Could not initialize beacon")
 
     @property
     def adv(self):
+        """Generate the advertising data for the iBeacon"""
         return (
             [
                 FLAGS_LENGHT,
@@ -69,8 +73,11 @@ class iBeacon(Beacon):
             ]
         )
 
-    @uBeaconDecorators.remove_adv_header
+    @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
+        """
+        Decode the received advertising data and set the corresponding attributes
+        """
         self.uuid = adv_data[6:22]
         self.major = unpack("!H", adv_data[22:24])[0]
         self.minor = unpack("!H", adv_data[24:26])[0]

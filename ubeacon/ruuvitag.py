@@ -5,7 +5,7 @@ RuuviTag Protocol Specification: hhttps://docs.ruuvi.com/communication/bluetooth
 from struct import unpack
 from micropython import const
 
-from . import Beacon, uBeaconDecorators
+from . import Beacon, ubeaconDecorators
 
 
 _DATA_FORMAT_3 = const(0x03)
@@ -20,7 +20,7 @@ class RuuviTag(Beacon):
     def adv(self):
         raise NotImplementedError("ADV Data is not supported")
 
-    @uBeaconDecorators.remove_adv_header
+    @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         data_format = adv_data[4]
 

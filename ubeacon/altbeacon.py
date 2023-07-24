@@ -12,7 +12,7 @@ from . import (
     FLAGS_TYPE,
     FLAGS_DATA,
     ADV_TYPE_MFG_DATA,
-    uBeaconDecorators,
+    ubeaconDecorators,
 )
 
 
@@ -39,13 +39,15 @@ class AltBeacon(Beacon):
         beacon_id_ou=None,  # 16-bytes
         beacon_id_uc=None,  # 4-bytes
         company_id=_COMPANY_ID,  # 2-byte
-        reference_rssi=_REFERENCE_RSSI,
-        mfg_reserved=_MFG_RESERVED,
+        reference_rssi=_REFERENCE_RSSI,  # 1-byte
+        mfg_reserved=_MFG_RESERVED,  # 1-byte
         *,
         adv_data=None,
     ):
+        # If adv_data is provided, decode it to initialize the beacon
         if adv_data:
             self.decode(adv_data)
+        # If beacon_id_ou and beacon_id_uc are provided, use them to initialize the beacon
         elif beacon_id_ou and beacon_id_uc:
             self.company_id = company_id
             self.beacon_id_ou = beacon_id_ou
@@ -53,10 +55,12 @@ class AltBeacon(Beacon):
             self.mfg_reserved = mfg_reserved
             self.reference_rssi = reference_rssi
         else:
+            # If neither adv_data nor required IDs are provided, raise an error
             raise ValueError("Could not initialize beacon")
 
     @property
     def adv(self):
+        """Generate the advertising data for the AltBeacon"""
         return (
             [
                 FLAGS_LENGHT,
@@ -75,8 +79,11 @@ class AltBeacon(Beacon):
             ]
         )
 
-    @uBeaconDecorators.remove_adv_header
+    @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
+        """
+        Decode the received advertising data and set the corresponding attributes
+        """
         self.beacon_id_ou = adv_data[6:22]
         self.beacon_id_uc = adv_data[22:26]
         self.company_id = adv_data[2:4]

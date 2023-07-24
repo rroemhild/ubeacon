@@ -1,12 +1,8 @@
-# uBeacon
+# ubeacon
 
-This library is in an early stage, things may change until there is a initial release.
+__ubeacon__ is a MicroPython library designed for encoding and decoding BLE beacons. It does not handle the advertisement or scanning part directly, as different MicroPython forks handle Bluetooth in various ways.
 
-## About
-
-MicroPython library for encoding and decoding BLE beacons. This library does not handle the advertise or scan part, because of the different MicroPython forks handle bluetooth different ways.
-
-Supported BLE Beacons
+Supported BLE beacons
 
 * AltBeacon
 * Eddystone-UID
@@ -16,11 +12,11 @@ Supported BLE Beacons
 * RuuviTag (decode only)
 
 
-## Beacon Name
+## Beacon Naming
 
-The beacon name is in the response data.
+The beacon name is included in the response data.
 
-To be compatible with the MicroPython forks, uBeacon use `micropython.unique_id` to get an unique id based on the Wifi MAC address. To change the beacon name, it can be set after instatiation. For example use the last 2-Bytes from the Bluetooth MAC address:
+To ensure compatibility with different MicroPython forks, __ubeacon__ utilizes `micropython.unique_id` to obtain a unique ID based on the Wi-Fi MAC address. To change the beacon name, it can be set after instantiation. For example, to use the last 2 bytes from the Bluetooth MAC address:
 
 ```python
 import bluetooth
@@ -29,13 +25,19 @@ from ubeacon.eddystone import EddystoneUID
 ble = bluetooth.BLE()
 
 beacon = EddystoneUID(NAMESPACE_ID, INSTANCE_ID)
-beacon.name = b"uBeacon " + hexlify(ble.config("mac")[1][4:]).upper()
+beacon.name = b"ubeacon " + hexlify(ble.config("mac")[1][4:]).upper()
 ```
 
 
 ## Quickstart
 
-Copy the ubeacon directory to your device. You can scip the beacon types you don't need for your project. `__init__.py` is mandatory. Find examples howto advertise the beacons in the examples directory.
+To get started, copy the *ubeacon* directory to your device. You may exclude the beacon types that are not required for your project, but please ensure to keep the *\_\_init\_\_.py* file as it is mandatory. You can find examples on how to advertise the beacons in the *examples* directory.
+
+### Install with mip
+
+```
+mpremote mip install github:rroemhild/ubeacon
+```
 
 ### Encode
 
@@ -48,7 +50,8 @@ INSTANCE_ID = bytes([0, 0, 0, 0, 0, 1])  # 6-bytes
 beacon = EddystoneUID(NAMESPACE_ID, INSTANCE_ID)
 ```
 
-Type `beacon` to get the string representation of the uBeacon object:
+Type `beacon` into the REPL to get the string representation of the __ubeacon__ object:
+
 
 ```python
 >>> beacon

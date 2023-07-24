@@ -16,7 +16,7 @@ def main():
     ble.active(True)
 
     beacon = AltBeacon(BEACON_ID_ORG_UNIT, BEACON_ID_USE_CASE)
-    beacon.name = b"uBeacon " + hexlify(ble.config("mac")[1][4:]).upper()
+    beacon.name = b"ubeacon " + hexlify(ble.config("mac")[1][4:]).upper()
 
     ble.gap_advertise(
         ADV_INTERVAL_MS,

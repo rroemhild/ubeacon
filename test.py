@@ -1,6 +1,6 @@
 import unittest
 
-from ubeacon import Beacon, uBeaconDecorators
+from ubeacon import Beacon, ubeaconDecorators
 from ubeacon.lintech import LinTechBeacon
 from ubeacon.ibeacon import iBeacon
 from ubeacon.ruuvitag import RuuviTag

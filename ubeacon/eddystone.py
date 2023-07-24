@@ -6,7 +6,7 @@ from struct import pack, unpack
 from binascii import hexlify
 from micropython import const
 
-from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, uBeaconDecorators
+from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, ubeaconDecorators
 
 
 # A 1-byte value representing the average received signal strength at 0m from the advertiser
@@ -56,17 +56,21 @@ class EddystoneUID(Beacon):
         *,
         adv_data=None,
     ):
+        # If adv_data is provided, decode it to initialize the beacon
         if adv_data:
             self.decode(adv_data)
+        # If namespace_id and instance_id are provided, use them to initialize the beacon
         elif namespace_id and instance_id:
             self.namespace_id = namespace_id
             self.instance_id = instance_id
             self.reference_rssi = reference_rssi
         else:
+            # If neither adv_data nor required IDs are provided, raise an error
             raise ValueError("Could not initialize beacon")
 
     @property
     def adv(self):
+        """Generate the advertising data for the EddystoneUID beacon"""
         return (
             [
                 FLAGS_LENGHT,
@@ -93,8 +97,11 @@ class EddystoneUID(Beacon):
             ]
         )
 
-    @uBeaconDecorators.remove_adv_header
+    @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
+        """
+        Decode the received advertising data and set the corresponding attributes
+        """
         self.reference_rssi = unpack("!b", bytes([adv_data[9]]))[0]
         self.namespace_id = adv_data[10:20]
         self.instance_id = adv_data[20:26]
@@ -102,8 +109,10 @@ class EddystoneUID(Beacon):
 
 class EddystoneURL(Beacon):
     def __init__(self, url=None, reference_rssi=_REFERENCE_RSSI, *, adv_data=None):
+        # If adv_data is provided, decode it to initialize the beacon
         if adv_data:
             self.decode(adv_data)
+        # If url is provided, use it to initialize the beacon
         elif url:
             self.url = url
             self.reference_rssi = reference_rssi
@@ -112,6 +121,7 @@ class EddystoneURL(Beacon):
 
     @property
     def adv(self):
+        """Generate the advertising data for the EddystoneURL beacon"""
         url = self.url
         url_scheme = 3
 
@@ -151,8 +161,11 @@ class EddystoneURL(Beacon):
             + [x for x in url]
         )
 
-    @uBeaconDecorators.remove_adv_header
+    @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
+        """
+        Decode the received advertising data and set the corresponding attributes
+        """
         url = b""
 
         # Only Eddystone URL frame
