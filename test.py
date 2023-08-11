@@ -137,9 +137,7 @@ class EddystoneUrlTest(unittest.TestCase):
     url = b"https://micropython.com"
     reference_rssi = -68
 
-    adv_bytes = (
-        b"\x02\x01\x06\x03\x03\xaa\xfe\x12\x16\xaa\xfe\x10\xbc\x03micropython\x07"
-    )
+    adv_bytes = b"\x02\x01\x06\x03\x03\xaa\xfe\x12\x16\xaa\xfe\x10\xbc\x03micropython\x07"
 
     def test_encode(self):
         beacon = EddystoneURL(
@@ -162,6 +160,38 @@ class EddystoneUrlTest(unittest.TestCase):
             beacon.adv_bytes,
             b"\x02\x01\x06\x03\x03\xaa\xfe\x14\x16\xaa\xfe\x10\xbc\x03micropython.de",
         )
+
+
+class RuuviTagTest(unittest.TestCase):
+
+    adv_bytes_v5 = b"\x02\x01\x06\x1b\xff\x99\x04\x05\x12\xfcS\x94\xc3|\x00\x04\xff\xfc\x04\x0c\xac6B\x00\xcd\xcb\xb83L\x88O"
+
+    def test_decode_df_5(self):
+        beacon = RuuviTag(adv_data=self.adv_bytes_v5)
+        self.assertEqual(beacon.data_format, 5)
+        self.assertEqual(beacon.temperature, 24.3)
+        self.assertEqual(beacon.humidity, 53.49)
+        self.assertEqual(beacon.pressure, 100044)
+        self.assertEqual(beacon.acceleration_x, 4)
+        self.assertEqual(beacon.acceleration_y, -4)
+        self.assertEqual(beacon.acceleration_z, 1036)
+        self.assertEqual(beacon.battery_voltage, 2977)
+        self.assertEqual(beacon.tx_power, 4)
+        self.assertEqual(beacon.movement_counter, 66)
+        self.assertEqual(beacon.measurement_sequence, 205)
+
+    adv_bytes_v3 = b"\x03)\x1a\x1e\xce\x1e\xfc\x18\xf9B\x02\xca\x0bS"
+
+    def test_decode_df_3(self):
+        beacon = RuuviTag(adv_data=self.adv_bytes_v3)
+        self.assertEqual(beacon.data_format, 3)
+        self.assertEqual(beacon.temperature, 26.3)
+        self.assertEqual(beacon.humidity, 20.5)
+        self.assertEqual(beacon.pressure, 102766)
+        self.assertEqual(beacon.acceleration_x, -1000)
+        self.assertEqual(beacon.acceleration_y, -1726)
+        self.assertEqual(beacon.acceleration_z, 714)
+        self.assertEqual(beacon.battery_voltage, 2899)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 """
-RuuviTag Protocol Specification: hhttps://docs.ruuvi.com/communication/bluetooth-advertisements
+RuuviTag Protocol Specification: https://docs.ruuvi.com/communication/bluetooth-advertisements
 """
 
 from struct import unpack
@@ -22,45 +22,51 @@ class RuuviTag(Beacon):
 
     @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
-        data_format = adv_data[4]
+        # Strip advertisement data
+        if b"\x99\x04" in adv_data[:4]:
+            adv_data = adv_data[4:]
+
+        data_format = adv_data[0]  # RuuviTag data format
 
         if data_format == _DATA_FORMAT_3:
-            self.data_format = 3
             self.decode_data_format_3(adv_data)
         elif data_format == _DATA_FORMAT_5:
-            self.data_format = 5
             self.decode_data_format_5(adv_data)
 
     def decode_data_format_3(self, adv_data):
         """Data format 3 (RAWv1)"""
-        self.humidity = adv_data[5] / 2
+        self.data_format = _DATA_FORMAT_3
 
-        temperature = adv_data[6] + adv_data[7] / 100
+        self.humidity = adv_data[1] / 2
+
+        temperature = adv_data[2] + adv_data[3] / 100
         if temperature > 128:
             temperature -= 128
             temperature = round(0 - temperature, 2)
         self.temperature = temperature
 
-        self.pressure = unpack("!H", adv_data[8:10])[0] + 50000
+        self.pressure = unpack("!H", adv_data[4:6])[0] + 50000
 
-        self.acceleration_x = unpack("!h", adv_data[10:12])[0]
-        self.acceleration_y = unpack("!h", adv_data[12:14])[0]
-        self.acceleration_z = unpack("!h", adv_data[14:16])[0]
-        self.battery_voltage = unpack("!H", adv_data[16:18])[0]
+        self.acceleration_x = unpack("!h", adv_data[6:8])[0]
+        self.acceleration_y = unpack("!h", adv_data[8:10])[0]
+        self.acceleration_z = unpack("!h", adv_data[10:12])[0]
+        self.battery_voltage = unpack("!H", adv_data[12:14])[0]
 
     def decode_data_format_5(self, adv_data):
         """Data format 5 (RAWv2)"""
-        self.temperature = unpack("!h", adv_data[5:7])[0] * 0.005
-        self.humidity = unpack("!H", adv_data[7:9])[0] * 0.0025
-        self.pressure = unpack("!H", adv_data[9:11])[0] + 50000
+        self.data_format = _DATA_FORMAT_5
 
-        self.acceleration_x = unpack("!h", adv_data[11:13])[0]
-        self.acceleration_y = unpack("!h", adv_data[13:15])[0]
-        self.acceleration_z = unpack("!h", adv_data[15:17])[0]
+        self.temperature = unpack("!h", adv_data[1:3])[0] * 0.005
+        self.humidity = unpack("!H", adv_data[3:5])[0] * 0.0025
+        self.pressure = unpack("!H", adv_data[5:7])[0] + 50000
 
-        power_bin = bin(unpack("!H", adv_data[17:19])[0])[2:]
+        self.acceleration_x = unpack("!h", adv_data[7:9])[0]
+        self.acceleration_y = unpack("!h", adv_data[9:11])[0]
+        self.acceleration_z = unpack("!h", adv_data[11:13])[0]
+
+        power_bin = bin(unpack("!H", adv_data[13:15])[0])[2:]
         self.battery_voltage = int(power_bin[:11], 2) + 1600
         self.tx_power = int(power_bin[11:], 2) * 2 - 40
 
-        self.movement_counter = adv_data[20]
-        self.measurement_sequence = unpack("!H", adv_data[20:22])[0]
+        self.movement_counter = adv_data[15]
+        self.measurement_sequence = unpack("!H", adv_data[16:18])[0]
