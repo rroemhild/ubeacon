@@ -10,6 +10,7 @@ Supported BLE beacons
 * iBeacon
 * LinTech Beacon
 * RuuviTag (decode only)
+* MikroTik (decode only)
 
 
 ## Beacon Naming

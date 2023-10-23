@@ -3,9 +3,11 @@ import unittest
 from ubeacon import Beacon, ubeaconDecorators
 from ubeacon.lintech import LinTechBeacon
 from ubeacon.ibeacon import iBeacon
+from ubeacon.mikrotik import MikroTik
 from ubeacon.ruuvitag import RuuviTag
 from ubeacon.altbeacon import AltBeacon
 from ubeacon.eddystone import EddystoneUID, EddystoneURL
+
 
 
 class ValidationTest(unittest.TestCase):
@@ -192,6 +194,21 @@ class RuuviTagTest(unittest.TestCase):
         self.assertEqual(beacon.acceleration_y, -1726)
         self.assertEqual(beacon.acceleration_z, 714)
         self.assertEqual(beacon.battery_voltage, 2899)
+
+class MikroTikBeaconTest(unittest.TestCase):
+
+    adv_bytes = b"\x15\xffO\t\x01\x00\xce\xa6\x00\x00\x00\x00\x02\x00\xa0\x1c\x91\x08W\x00\x00_"
+
+    def test_decode(self):
+        beacon = MikroTik(adv_data=self.adv_bytes)
+        self.assertEqual(beacon.encrypted, 0)
+        self.assertEqual(beacon.acceleration_x, 0)
+        self.assertEqual(beacon.acceleration_y, 0)
+        self.assertEqual(beacon.acceleration_z, 0.0078125)
+        self.assertEqual(beacon.temperature, 28.625)
+        self.assertEqual(beacon.uptime, 5703825)
+        self.assertEqual(beacon.trigger, 0)
+        self.assertEqual(beacon.battery, 95)
 
 
 if __name__ == "__main__":
