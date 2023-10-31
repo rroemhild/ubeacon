@@ -5,7 +5,8 @@
     ["ubeacon/eddystone.py", "github:rroemhild/ubeacon/ubeacon/eddystone.py"],
     ["ubeacon/ibeacon.py", "github:rroemhild/ubeacon/ubeacon/ibeacon.py"],
     ["ubeacon/lintech.py", "github:rroemhild/ubeacon/ubeacon/lintech.py"],
-    ["ubeacon/ruuvitag.py", "github:rroemhild/ubeacon/ubeacon/ruuvitag.py"]
+    ["ubeacon/ruuvitag.py", "github:rroemhild/ubeacon/ubeacon/ruuvitag.py"],
+    ["ubeacon/mikrotik.py", "github:rroemhild/ubeacon/ubeacon/mikrotik.py"]
   ],
   "deps": [],
   "version": "0.1.0"
