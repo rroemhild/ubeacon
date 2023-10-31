@@ -4,7 +4,6 @@ LinTech Beacon Protocol Specification: https://www.lintech.de/support/downloads/
 
 from struct import pack, unpack
 from binascii import hexlify
-from micropython import const
 
 from . import (
     Beacon,

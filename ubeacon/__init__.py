@@ -1,7 +1,6 @@
 import sys
 
 from binascii import hexlify
-from micropython import const
 
 
 # Constants for the advertising data flags

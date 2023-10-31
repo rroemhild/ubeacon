@@ -4,7 +4,6 @@ AltBeacon Protocol Specification: https://github.com/AltBeacon/spec
 
 from struct import pack, unpack
 from binascii import hexlify
-from micropython import const
 
 from . import (
     Beacon,

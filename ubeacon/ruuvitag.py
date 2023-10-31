@@ -3,7 +3,6 @@ RuuviTag Protocol Specification: https://docs.ruuvi.com/communication/bluetooth-
 """
 
 from struct import unpack
-from micropython import const
 
 from . import Beacon, ubeaconDecorators
 

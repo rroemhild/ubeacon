@@ -4,13 +4,9 @@ MikroTik Protocol Specification
 https://help.mikrotik.com/docs/display/UM/MikroTik+Tag+advertisement+formats
 """
 
-from struct import pack, unpack
-from binascii import hexlify, unhexlify
+from struct import unpack
 
-from . import (
-    Beacon,
-    ubeaconDecorators,
-)
+from . import Beacon
 
 
 class MikroTik(Beacon):

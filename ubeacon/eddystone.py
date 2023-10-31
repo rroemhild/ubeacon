@@ -4,7 +4,6 @@ Eddystone Protocol Specification: https://github.com/google/eddystone
 
 from struct import pack, unpack
 from binascii import hexlify
-from micropython import const
 
 from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, ubeaconDecorators
 

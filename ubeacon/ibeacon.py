@@ -4,7 +4,6 @@ iBeacon Protocol Specification: https://developer.apple.com/ibeacon/
 
 from struct import unpack
 from binascii import hexlify
-from micropython import const
 
 from . import (
     Beacon,
