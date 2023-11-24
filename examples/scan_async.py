@@ -19,7 +19,7 @@ _IBEACON_UUID = const(0x004C)
 _MIKROTIK_UUID = const(0x094F)
 _RUUVITAG_UUID = const(0x0499)
 _ALTBEACON_DEVICE_TYPE = bytes([0xBE, 0xAC])
-_EDDYSTONE_UUID = bluetooth.UUID(0xfeaa)
+_EDDYSTONE_UUID = bluetooth.UUID(0xFEAA)
 _EDDYSTONE_UID = const(0x00)
 _EDDYSTONE_URL = const(0x10)
 

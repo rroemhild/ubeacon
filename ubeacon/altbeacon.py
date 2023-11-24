@@ -20,10 +20,10 @@ from . import (
 _COMPANY_ID = const(0x0118)
 
 # AltBeacon advertisement code
-_DEVICE_TYPE = const(0xbeac)
+_DEVICE_TYPE = const(0xBEAC)
 
 # Length of the data frame from the manufacturer specific ADV data structure.
-_ADV_LENGHT = const(0x1b)
+_ADV_LENGHT = const(0x1B)
 
 # Reserved for use by the manufacturer to implement special features
 _MFG_RESERVED = const(0x01)
@@ -86,7 +86,7 @@ class AltBeacon(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[1:])  != _ADV_LENGHT:
+        if len(adv_data[1:]) != _ADV_LENGHT:
             raise ValueError("Invalid size")
 
         self.company_id = unpack("<H", adv_data[2:4])[0]

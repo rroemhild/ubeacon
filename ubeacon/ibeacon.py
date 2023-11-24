@@ -16,13 +16,13 @@ from . import (
 
 
 # The beacon device manufacturer's company identifier code.
-_COMPANY_ID = const(0x004c)
+_COMPANY_ID = const(0x004C)
 
 # iBeacon advertisement code
 _DEVICE_TYPE = const(0x0215)
 
 # Length of the data frame from the manufacturer specific ADV data structure.
-_ADV_LENGHT = const(0x1a)
+_ADV_LENGHT = const(0x1A)
 
 # Value representing the average received signal strength at 1m from the advertiser
 _REFERENCE_RSSI = const(-70)
@@ -77,7 +77,7 @@ class iBeacon(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[1:])  != _ADV_LENGHT:
+        if len(adv_data[1:]) != _ADV_LENGHT:
             raise ValueError("Invalid size")
 
         self.uuid = str(UUID(adv_data[6:22]))

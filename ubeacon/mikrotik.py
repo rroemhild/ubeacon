@@ -29,7 +29,7 @@ class MikroTik(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[1:])  != _ADV_LENGHT:
+        if len(adv_data[1:]) != _ADV_LENGHT:
             raise ValueError("Invalid size")
 
         self.version = adv_data[4]

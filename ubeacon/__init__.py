@@ -9,7 +9,7 @@ FLAGS_TYPE = const(0x01)
 FLAGS_LENGHT = const(0x02)
 
 # ADV data frame type for the manufacturer specific ADV data structure
-ADV_TYPE_MFG_DATA = const(0xff)
+ADV_TYPE_MFG_DATA = const(0xFF)
 
 # ADV data frame Frame type for complete local name
 _ADV_TYPE_COMPLETE_NAME = const(0x09)
@@ -37,6 +37,7 @@ class ubeaconDecorators:
     @classmethod
     def remove_adv_header(cls, decorated):
         """Decorator to remove the ADV data flags header if any"""
+
         def inner(cls, adv_data):
             if adv_data[:2] == bytes([0x02, 0x01]):
                 adv_data = adv_data[3:]
@@ -48,7 +49,7 @@ class ubeaconDecorators:
 class UUID:
     def __init__(self, bytes):
         if len(bytes) != 16:
-            raise ValueError('bytes arg must be 16 bytes long')
+            raise ValueError("bytes arg must be 16 bytes long")
         self._bytes = bytes
 
     @property
@@ -57,7 +58,7 @@ class UUID:
 
     def __str__(self):
         h = self.hex
-        return '-'.join((h[0:8], h[8:12], h[12:16], h[16:20], h[20:32]))
+        return "-".join((h[0:8], h[8:12], h[12:16], h[16:20], h[20:32]))
 
     def __repr__(self):
         return f"UUID({str(self)})"
