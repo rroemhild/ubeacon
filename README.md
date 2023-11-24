@@ -45,8 +45,8 @@ mpremote mip install github:rroemhild/ubeacon
 ```python
 from ubeacon.eddystone import EddystoneUID
 
-NAMESPACE_ID = b"Eddystone!"  # 10-bytes
-INSTANCE_ID = bytes([0, 0, 0, 0, 0, 1])  # 6-bytes
+NAMESPACE_ID = "85b9ae954b59c3d6f69d"  # 10-bytes
+INSTANCE_ID = "000000001337"  # 6-bytes
 
 beacon = EddystoneUID(NAMESPACE_ID, INSTANCE_ID)
 ```
@@ -56,7 +56,7 @@ Type `beacon` into the REPL to get the string representation of the __ubeacon__ 
 
 ```python
 >>> beacon
-EddystoneUID({'namespace_id': b'Eddystone!', 'instance_id': b'\x00\x00\x00\x00\x00\x01', 'reference_rssi': -70})
+EddystoneUID({"namespace_id": "85b9ae954b59c3d6f69d", "instance_id": "000000001337", "reference_rssi": -70})
 ```
 
 ### Decode
@@ -64,6 +64,6 @@ EddystoneUID({'namespace_id': b'Eddystone!', 'instance_id': b'\x00\x00\x00\x00\x
 ```python
 from ubeacon.altbeacon import AltBeacon
 
-adv_data = b'\x02\x01\x06\x1b\xff\x18\x01\xbe\xacMicroPython BLE!\x15\x00\x00\x01\xba\x00'
+adv_data = b"\x02\x01\x06\x1b\xff9\x05\xbe\xac=\xf9=Z\xa1\xf2G\xbb\xa3\xcf>I\xe6\xa8\x9b\xb6\x00\x11\x00*\xbb#"
 beacon = AltBeacon(adv_data=adv_data)
 ```
