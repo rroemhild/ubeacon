@@ -3,9 +3,9 @@ LinTech Beacon Protocol Specification: https://www.lintech.de/support/downloads/
 """
 
 from struct import pack, unpack
-from binascii import hexlify
 
 from . import (
+    UUID,
     Beacon,
     FLAGS_LENGHT,
     FLAGS_TYPE,
@@ -16,41 +16,22 @@ from . import (
 
 
 # The beacon device manufacturer's company identifier code.
-_COMPANY_ID = bytes([0x44, 0x01])
+_COMPANY_ID = const(0x0144)  # bytes([0x44, 0x01])
 
 # LinTech beacon advertisement code
-_DEVICE_TYPE = bytes([0xFF, 0x03])
+_DEVICE_TYPE = const(0xff03)  # bytes([0xFF, 0x03])
 
 # Length of the data frame from the manufacturer specific ADV data structure.
-_ADV_LENGHT = const(0x1B)
+_ADV_LENGHT = const(0x1b)
 
 # Value representing the average received signal strength at 1m from the advertiser
 _REFERENCE_RSSI = const(-70)
 
 # LinTech Beacon Proximity UUID
-_PROXIMITY_UUID = bytes(
-    [
-        0xBE,
-        0xFF,
-        0x10,
-        0x20,
-        0x29,
-        0x20,
-        0xFF,
-        0x44,
-        0x01,
-        0x03,
-        0xFF,
-        0x4A,
-        0x40,
-        0x0A,
-        0xBF,
-        0xD7,
-    ]
-)
+_PROXIMITY_UUID = "beff1020-2920-ff44-0103-ff4a400abfd7"
 
 # TX Power & Battery Level is, set to a fixed value for test only
-_TX_BAT_STATUS = const(0xFC)
+_TX_BAT_STATUS = const(0xfc)
 
 
 class LinTechBeacon(Beacon):
@@ -87,13 +68,13 @@ class LinTechBeacon(Beacon):
                 _ADV_LENGHT,
                 ADV_TYPE_MFG_DATA,
             ]
-            + [x for x in _COMPANY_ID]
-            + [x for x in _DEVICE_TYPE]
-            + [x for x in self.validate(self.uuid, 16)]
-            + [x for x in self.validate(self.major, 2)]
-            + [x for x in self.validate(self.minor, 2)]
+            + [x for x in pack("<H", _COMPANY_ID)]
+            + [x for x in pack(">H", _DEVICE_TYPE)]
+            + [x for x in self.validate(self.uuid_to_bin(self.uuid), 16)]
+            + [x for x in self.validate(pack(">H", self.major), 2)]
+            + [x for x in self.validate(pack(">H", self.minor), 2)]
             + [
-                self.validate(self.reference_rssi, 1)[0],
+                self.validate(pack(">b", self.reference_rssi), 1)[0],
                 _TX_BAT_STATUS,
             ]
         )
@@ -103,9 +84,12 @@ class LinTechBeacon(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        self.uuid = adv_data[6:22]
-        self.major = unpack("!H", adv_data[22:24])[0]
-        self.minor = unpack("!H", adv_data[24:26])[0]
-        self.reference_rssi = unpack("!b", bytes([adv_data[26]]))[0]
+        if len(adv_data[1:])  != _ADV_LENGHT:
+            raise ValueError("Invalid size")
+
+        self.uuid = str(UUID(adv_data[6:22]))
+        self.major = unpack(">H", adv_data[22:24])[0]
+        self.minor = unpack(">H", adv_data[24:26])[0]
+        self.reference_rssi = unpack(">b", bytes([adv_data[26]]))[0]
         self.tx_power = adv_data[27] & 0b111
         self.battery_level = adv_data[27] >> 3

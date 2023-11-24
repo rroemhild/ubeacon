@@ -3,9 +3,9 @@ Eddystone Protocol Specification: https://github.com/google/eddystone
 """
 
 from struct import pack, unpack
-from binascii import hexlify
+from binascii import hexlify, unhexlify
 
-from . import Beacon, FLAGS_LENGHT, FLAGS_TYPE, FLAGS_DATA, ubeaconDecorators
+from . import Beacon
 
 
 # A 1-byte value representing the average received signal strength at 0m from the advertiser
@@ -14,7 +14,7 @@ _REFERENCE_RSSI = const(-70)
 _SERVICE_LENGTH = const(0x03)
 _SERVICE_UUID_TYPES = const(0x03)
 
-_EDDYSTONE_UUID = bytes([0xAA, 0xFE])
+_EDDYSTONE_UUID = const(0xfeaa)
 _EDDYSTONE_FRAME_LENGHT = const(0x17)
 _EDDYSTONE_FRAME_TYPE_UID = const(0x00)
 _EDDYSTONE_FRAME_TYPE_URL = const(0x10)
@@ -72,38 +72,37 @@ class EddystoneUID(Beacon):
         """Generate the advertising data for the EddystoneUID beacon"""
         return (
             [
-                FLAGS_LENGHT,
-                FLAGS_TYPE,
-                FLAGS_DATA,
                 _SERVICE_LENGTH,
                 _SERVICE_UUID_TYPES,
             ]
-            + [x for x in _EDDYSTONE_UUID]
+            + [x for x in pack("<H", _EDDYSTONE_UUID)]
             + [
                 _EDDYSTONE_FRAME_LENGHT,
                 _EDDYSTONE_SERVICE_DATA,
             ]
-            + [x for x in _EDDYSTONE_UUID]
+            + [x for x in pack("<H", _EDDYSTONE_UUID)]
             + [
                 _EDDYSTONE_FRAME_TYPE_UID,
-                self.validate(self.reference_rssi, 1)[0],
+                self.validate(pack(">b", self.reference_rssi), 1)[0],
             ]
-            + [x for x in self.validate(self.namespace_id, 10)]
-            + [x for x in self.validate(self.instance_id, 6)]
+            + [x for x in self.validate(unhexlify(self.namespace_id), 10)]
+            + [x for x in self.validate(unhexlify(self.instance_id), 6)]
             + [
                 _EDDYSTONE_RESERVED,
                 _EDDYSTONE_RESERVED,
             ]
         )
 
-    @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        self.reference_rssi = unpack("!b", bytes([adv_data[9]]))[0]
-        self.namespace_id = adv_data[10:20]
-        self.instance_id = adv_data[20:26]
+        if len(adv_data[5:])  != _EDDYSTONE_FRAME_LENGHT:
+            raise ValueError("Invalid size")
+
+        self.reference_rssi = unpack(">b", bytes([adv_data[9]]))[0]
+        self.namespace_id = hexlify(adv_data[10:20]).decode()
+        self.instance_id = hexlify(adv_data[20:26]).decode()
 
 
 class EddystoneURL(Beacon):
@@ -113,7 +112,7 @@ class EddystoneURL(Beacon):
             self.decode(adv_data)
         # If url is provided, use it to initialize the beacon
         elif url:
-            self.url = url
+            self.url = url.encode()
             self.reference_rssi = reference_rssi
         else:
             raise ValueError("Could not initialize beacon")
@@ -140,18 +139,15 @@ class EddystoneURL(Beacon):
 
         return (
             [
-                FLAGS_LENGHT,
-                FLAGS_TYPE,
-                FLAGS_DATA,
                 _SERVICE_LENGTH,
                 _SERVICE_UUID_TYPES,
             ]
-            + [x for x in _EDDYSTONE_UUID]
+            + [x for x in pack("<H", _EDDYSTONE_UUID)]
             + [
                 url_frame_lenght,
                 _EDDYSTONE_SERVICE_DATA,
             ]
-            + [x for x in _EDDYSTONE_UUID]
+            + [x for x in pack("<H", _EDDYSTONE_UUID)]
             + [
                 _EDDYSTONE_FRAME_TYPE_URL,
                 self.validate(self.reference_rssi, 1)[0],
@@ -160,7 +156,6 @@ class EddystoneURL(Beacon):
             + [x for x in url]
         )
 
-    @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         """
         Decode the received advertising data and set the corresponding attributes
@@ -180,5 +175,5 @@ class EddystoneURL(Beacon):
             if byte <= 13:
                 url = url.replace(bytes([byte]), _URL_TLD[byte])
 
-        self.url = url
-        self.reference_rssi = unpack("!b", bytes([adv_data[5]]))[0]
+        self.url = url.decode()
+        self.reference_rssi = unpack(">b", bytes([adv_data[5]]))[0]

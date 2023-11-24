@@ -2,10 +2,10 @@
 iBeacon Protocol Specification: https://developer.apple.com/ibeacon/
 """
 
-from struct import unpack
-from binascii import hexlify
+from struct import pack, unpack
 
 from . import (
+    UUID,
     Beacon,
     FLAGS_LENGHT,
     FLAGS_TYPE,
@@ -16,13 +16,13 @@ from . import (
 
 
 # The beacon device manufacturer's company identifier code.
-_COMPANY_ID = bytes([0x4C, 0x00])
+_COMPANY_ID = const(0x004c)
 
 # iBeacon advertisement code
-_DEVICE_TYPE = bytes([0x02, 0x15])
+_DEVICE_TYPE = const(0x0215)
 
 # Length of the data frame from the manufacturer specific ADV data structure.
-_ADV_LENGHT = const(0x1A)
+_ADV_LENGHT = const(0x1a)
 
 # Value representing the average received signal strength at 1m from the advertiser
 _REFERENCE_RSSI = const(-70)
@@ -62,13 +62,13 @@ class iBeacon(Beacon):
                 _ADV_LENGHT,
                 ADV_TYPE_MFG_DATA,
             ]
-            + [x for x in _COMPANY_ID]
-            + [x for x in _DEVICE_TYPE]
-            + [x for x in self.validate(self.uuid, 16)]
-            + [x for x in self.validate(self.major, 2)]
-            + [x for x in self.validate(self.minor, 2)]
+            + [x for x in pack("<H", _COMPANY_ID)]
+            + [x for x in pack(">H", _DEVICE_TYPE)]
+            + [x for x in self.validate(self.uuid_to_bin(self.uuid), 16)]
+            + [x for x in self.validate(pack(">H", self.major), 2)]
+            + [x for x in self.validate(pack(">H", self.minor), 2)]
             + [
-                self.validate(self.reference_rssi, 1)[0],
+                self.validate(pack(">b", self.reference_rssi), 1)[0],
             ]
         )
 
@@ -77,7 +77,10 @@ class iBeacon(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        self.uuid = adv_data[6:22]
-        self.major = unpack("!H", adv_data[22:24])[0]
-        self.minor = unpack("!H", adv_data[24:26])[0]
-        self.reference_rssi = unpack("!b", bytes([adv_data[26]]))[0]
+        if len(adv_data[1:])  != _ADV_LENGHT:
+            raise ValueError("Invalid size")
+
+        self.uuid = str(UUID(adv_data[6:22]))
+        self.major = unpack(">H", adv_data[22:24])[0]
+        self.minor = unpack(">H", adv_data[24:26])[0]
+        self.reference_rssi = unpack(">b", bytes([adv_data[26]]))[0]

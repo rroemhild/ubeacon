@@ -18,7 +18,7 @@ def main():
 
     ble.gap_advertise(
         ADV_INTERVAL_MS,
-        adv_data=beacon.adv_bytes,
+        adv_data=beacon.adv_data,
         resp_data=beacon.resp_bytes,
         connectable=False,
     )

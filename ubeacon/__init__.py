@@ -1,6 +1,6 @@
 import sys
 
-from binascii import hexlify
+from binascii import hexlify, unhexlify
 
 
 # Constants for the advertising data flags
@@ -8,8 +8,8 @@ FLAGS_DATA = const(0x06)  # Discoverable, without BR/EDR support
 FLAGS_TYPE = const(0x01)
 FLAGS_LENGHT = const(0x02)
 
-# ADV data frame  type for the manufacturer specific ADV data structure
-ADV_TYPE_MFG_DATA = const(0xFF)
+# ADV data frame type for the manufacturer specific ADV data structure
+ADV_TYPE_MFG_DATA = const(0xff)
 
 # ADV data frame Frame type for complete local name
 _ADV_TYPE_COMPLETE_NAME = const(0x09)
@@ -45,6 +45,24 @@ class ubeaconDecorators:
         return inner
 
 
+class UUID:
+    def __init__(self, bytes):
+        if len(bytes) != 16:
+            raise ValueError('bytes arg must be 16 bytes long')
+        self._bytes = bytes
+
+    @property
+    def hex(self):
+        return hexlify(self._bytes).decode()
+
+    def __str__(self):
+        h = self.hex
+        return '-'.join((h[0:8], h[8:12], h[12:16], h[16:20], h[20:32]))
+
+    def __repr__(self):
+        return f"UUID({str(self)})"
+
+
 class Beacon:
     # Use the Wifi MAC address to get a 2-byte unique id
     name = b"ubeacon " + _unique_id()
@@ -59,15 +77,21 @@ class Beacon:
         return "{}({!r})".format(self.__class__.__name__, self.__dict__)
 
     @property
-    def adv_bytes(self):
+    def adv(self):
         """
-        Get the advertising data as bytes
+        Generate the advertising data for the AltBeacon (needs to be
+        implemented in child classes)
         """
+        raise NotImplementedError("ADV Data is not supported")
+
+    @property
+    def adv_data(self):
+        """Get the advertising data as bytes"""
         return bytes(self.adv)
 
     @property
     def resp(self):
-        """Generate the response data for the uBeacon"""
+        """Generate response data for beacon"""
         return [
             FLAGS_LENGHT,
             FLAGS_TYPE,
@@ -89,19 +113,24 @@ class Beacon:
         raise NotImplementedError("No decode method in child class implemented")
 
     @staticmethod
+    def uuid_to_bin(uuid):
+        uuid = uuid.replace("-", "")
+        return unhexlify(uuid.encode())
+
+    @staticmethod
     def validate(value, size: int) -> bytes:
         """
         Validate and convert the provided value into bytes with the given size
         """
-        value_bytes = b""
+        _bytes = b""
 
         if isinstance(value, bytes):
-            value_bytes = value
-            if len(value_bytes) != size:
+            _bytes = value
+            if len(_bytes) != size:
                 raise ValueError("Value has to be {}-bytes long".format(size))
         elif isinstance(value, int):
-            value_bytes = value.to_bytes(size, "big")
+            _bytes = value.to_bytes(size, "big")
         else:
             raise ValueError("Value has to be int or bytes")
 
-        return value_bytes
+        return _bytes

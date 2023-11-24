@@ -36,13 +36,9 @@ def main():
         if adv:
             data = adv.data
 
-            # Remove ADV flags from data if any
-            if data[:2] == bytes([0x02, 0x01]):
-                data = data[3:]
-
             # Parse beacons
             if data[1] == 0xFF:
-                if _ALTBEACON and data[4:6] == _ALTBEACON_TYPE_ID:
+                if _ALTBEACON and data[4:6] == _ALTBEACON:
                     beacon = AltBeacon(adv_data=data)
                 elif _IBEACON and data[2:4] == _IBEACON:
                     beacon = iBeacon(adv_data=data)

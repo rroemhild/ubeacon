@@ -5,8 +5,8 @@ from binascii import hexlify
 from ubeacon.eddystone import EddystoneUID
 
 
-NAMESPACE_ID = b"Eddystone!"  # 10-bytes
-INSTANCE_ID = bytes([0, 0, 0, 0, 0, 1])  # 6-bytes
+NAMESPACE_ID = "85b9ae954b59c3d6f69d"  # 10-bytes
+INSTANCE_ID = "000000001337"  # 6-bytes
 
 ADV_INTERVAL_MS = 250_000
 
@@ -19,7 +19,7 @@ def main():
 
     ble.gap_advertise(
         ADV_INTERVAL_MS,
-        adv_data=beacon.adv_bytes,
+        adv_data=beacon.adv_data,
         resp_data=beacon.resp_bytes,
         connectable=False,
     )
