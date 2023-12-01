@@ -25,7 +25,7 @@ from ubeacon.eddystone import EddystoneUID
 
 ble = bluetooth.BLE()
 
-beacon = EddystoneUID(NAMESPACE_ID, INSTANCE_ID)
+beacon = EddystoneUID(NAMESPACE, INSTANCE)
 beacon.name = b"ubeacon " + hexlify(ble.config("mac")[1][4:]).upper()
 ```
 
@@ -45,10 +45,10 @@ mpremote mip install github:rroemhild/ubeacon
 ```python
 from ubeacon.eddystone import EddystoneUID
 
-NAMESPACE_ID = "85b9ae954b59c3d6f69d"  # 10-bytes
-INSTANCE_ID = "000000001337"  # 6-bytes
+NAMESPACE = "85b9ae954b59c3d6f69d"  # 10-bytes
+INSTANCE = "000000001337"  # 6-bytes
 
-beacon = EddystoneUID(NAMESPACE_ID, INSTANCE_ID)
+beacon = EddystoneUID(NAMESPACE, INSTANCE)
 ```
 
 Type `beacon` into the REPL to get the string representation of the __ubeacon__ object:
@@ -56,7 +56,7 @@ Type `beacon` into the REPL to get the string representation of the __ubeacon__ 
 
 ```python
 >>> beacon
-EddystoneUID({"namespace_id": "85b9ae954b59c3d6f69d", "instance_id": "000000001337", "reference_rssi": -70})
+EddystoneUID({"namespace": "85b9ae954b59c3d6f69d", "instance": "000000001337", "reference_rssi": -70})
 ```
 
 ### Decode

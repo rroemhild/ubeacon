@@ -49,8 +49,8 @@ _URL_TLD = (
 class EddystoneUID(Beacon):
     def __init__(
         self,
-        namespace_id=None,  # 10-bytes
-        instance_id=None,  # 6-bytes
+        namespace=None,  # 10-bytes
+        instance=None,  # 6-bytes
         reference_rssi=_REFERENCE_RSSI,  # 1-byte
         *,
         adv_data=None,
@@ -59,9 +59,9 @@ class EddystoneUID(Beacon):
         if adv_data:
             self.decode(adv_data)
         # If namespace_id and instance_id are provided, use them to initialize the beacon
-        elif namespace_id and instance_id:
-            self.namespace_id = namespace_id
-            self.instance_id = instance_id
+        elif namespace and instance:
+            self.namespace = namespace
+            self.instance = instance
             self.reference_rssi = reference_rssi
         else:
             # If neither adv_data nor required IDs are provided, raise an error
@@ -85,8 +85,8 @@ class EddystoneUID(Beacon):
                 _EDDYSTONE_FRAME_TYPE_UID,
                 self.validate(pack(">b", self.reference_rssi), 1)[0],
             ]
-            + [x for x in self.validate(unhexlify(self.namespace_id), 10)]
-            + [x for x in self.validate(unhexlify(self.instance_id), 6)]
+            + [x for x in self.validate(unhexlify(self.namespace), 10)]
+            + [x for x in self.validate(unhexlify(self.instance), 6)]
             + [
                 _EDDYSTONE_RESERVED,
                 _EDDYSTONE_RESERVED,
@@ -101,8 +101,8 @@ class EddystoneUID(Beacon):
             raise ValueError("Invalid size")
 
         self.reference_rssi = unpack(">b", bytes([adv_data[9]]))[0]
-        self.namespace_id = hexlify(adv_data[10:20]).decode()
-        self.instance_id = hexlify(adv_data[20:26]).decode()
+        self.namespace = hexlify(adv_data[10:20]).decode()
+        self.instance = hexlify(adv_data[20:26]).decode()
 
 
 class EddystoneURL(Beacon):

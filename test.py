@@ -113,24 +113,24 @@ class LinTechBeaconTest(unittest.TestCase):
 
 class EddystoneUidTest(unittest.TestCase):
 
-    namespace_id = "85b9ae954b59c3d6f69d"  # 10-bytes
-    instance_id = "000000001337"  # 6-bytes
+    namespace = "85b9ae954b59c3d6f69d"  # 10-bytes
+    instance = "000000001337"  # 6-bytes
     reference_rssi = -65
 
     adv_data = b"\x03\x03\xaa\xfe\x17\x16\xaa\xfe\x00\xbf\x85\xb9\xae\x95KY\xc3\xd6\xf6\x9d\x00\x00\x00\x00\x137\x00\x00"
 
     def test_encode(self):
         beacon = EddystoneUID(
-            namespace_id=self.namespace_id,
-            instance_id=self.instance_id,
+            namespace=self.namespace,
+            instance=self.instance,
             reference_rssi=self.reference_rssi,
         )
         self.assertEqual(beacon.adv_data, self.adv_data)
 
     def test_decode(self):
         beacon = EddystoneUID(adv_data=self.adv_data)
-        self.assertEqual(beacon.namespace_id, self.namespace_id)
-        self.assertEqual(beacon.instance_id, self.instance_id)
+        self.assertEqual(beacon.namespace, self.namespace)
+        self.assertEqual(beacon.instance, self.instance)
         self.assertEqual(beacon.reference_rssi, self.reference_rssi)
 
 
