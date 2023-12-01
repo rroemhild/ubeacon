@@ -65,6 +65,8 @@ class UUID:
 
 
 class Beacon:
+    """Base class for all beacons. Should not be used by itself."""
+
     # Use the Wifi MAC address to get a 2-byte unique id
     name = b"ubeacon " + _unique_id()
 

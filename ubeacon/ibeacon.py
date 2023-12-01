@@ -28,10 +28,10 @@ _ADV_LENGHT = const(0x1A)
 _REFERENCE_RSSI = const(-70)
 
 
-class iBeacon(Beacon):
+class IBeacon(Beacon):
     def __init__(
         self,
-        uuid=None,  # 16-bytes
+        uuid=None,  # c9ae8912-0c99-471d-ac77-d013f4956c33
         major=None,  # 0 - 65535
         minor=None,  # 0 - 65535
         reference_rssi=_REFERENCE_RSSI,  # 1-byte

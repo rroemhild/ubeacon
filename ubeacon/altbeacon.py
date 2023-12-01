@@ -35,11 +35,11 @@ _REFERENCE_RSSI = const(-70)
 class AltBeacon(Beacon):
     def __init__(
         self,
-        company_id=_COMPANY_ID,  # 2-byte
-        uuid=None,  # 16-bytes
-        major=None,  # 2-bytes
-        minor=None,  # 2-bytes
-        reference_rssi=_REFERENCE_RSSI,  # 1-byte
+        company_id=_COMPANY_ID,  # 0 - 255
+        uuid=None,  # c9ae8912-0c99-471d-ac77-d013f4956c33
+        major=None,  # 0 - 65535
+        minor=None,  # 0 - 65535
+        reference_rssi=_REFERENCE_RSSI,  # average received signal strength at 1m
         mfg_reserved=_MFG_RESERVED,  # 1-byte
         *,
         adv_data=None,

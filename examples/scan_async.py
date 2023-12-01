@@ -6,7 +6,7 @@ from ubinascii import hexlify
 
 from ubeacon import ubeaconDecorators
 from ubeacon.lintech import LinTechBeacon
-from ubeacon.ibeacon import iBeacon
+from ubeacon.ibeacon import IBeacon
 from ubeacon.ruuvitag import RuuviTag
 from ubeacon.altbeacon import AltBeacon
 from ubeacon.eddystone import EddystoneUID, EddystoneURL
@@ -47,7 +47,7 @@ async def scan():
                     if mfg_id == _LINTECH_UUID:
                         beacon = LinTechBeacon(adv_data=result.adv_data)
                     elif mfg_id == _IBEACON_UUID:
-                        beacon = iBeacon(adv_data=result.adv_data)
+                        beacon = IBeacon(adv_data=result.adv_data)
                     elif mfg_id == _RUUVITAG_UUID:
                         beacon = RuuviTag(adv_data=result.adv_data)
                     elif mfg_data[:2] == _ALTBEACON_DEVICE_TYPE:

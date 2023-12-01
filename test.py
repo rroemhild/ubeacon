@@ -2,7 +2,7 @@ import unittest
 
 from ubeacon import Beacon
 from ubeacon.lintech import LinTechBeacon
-from ubeacon.ibeacon import iBeacon
+from ubeacon.ibeacon import IBeacon
 from ubeacon.mikrotik import MikroTik
 from ubeacon.ruuvitag import RuuviTag
 from ubeacon.altbeacon import AltBeacon
@@ -60,7 +60,7 @@ class AltBeaconTest(unittest.TestCase):
         self.assertEqual(beacon.reference_rssi, self.reference_rssi)
 
 
-class iBeaconTest(unittest.TestCase):
+class IBeaconTest(unittest.TestCase):
 
     uuid = "acbdf5ff-d272-45f5-8e45-01672fe51c47"
     major = 1337
@@ -70,7 +70,7 @@ class iBeaconTest(unittest.TestCase):
     adv_data = b"\x02\x01\x06\x1a\xffL\x00\x02\x15\xac\xbd\xf5\xff\xd2rE\xf5\x8eE\x01g/\xe5\x1cG\x059\x00\x15\xbf"
 
     def test_encode(self):
-        beacon = iBeacon(
+        beacon = IBeacon(
             uuid=self.uuid,
             major=self.major,
             minor=self.minor,
@@ -79,7 +79,7 @@ class iBeaconTest(unittest.TestCase):
         self.assertEqual(beacon.adv_data, self.adv_data)
 
     def test_decode(self):
-        beacon = iBeacon(adv_data=self.adv_data)
+        beacon = IBeacon(adv_data=self.adv_data)
         self.assertEqual(beacon.uuid, self.uuid)
         self.assertEqual(beacon.major, self.major)
         self.assertEqual(beacon.minor, self.minor)
