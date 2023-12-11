@@ -15,7 +15,8 @@ _SERVICE_LENGTH = const(0x03)
 _SERVICE_UUID_TYPES = const(0x03)
 
 _EDDYSTONE_UUID = const(0xFEAA)
-_EDDYSTONE_FRAME_LENGHT = const(0x17)
+_EDDYSTONE_FRAME_LENGTH = const(0x17)
+_EDDYSTONE_FRAME_LENGTH_LEGACY = const(0x15)
 _EDDYSTONE_FRAME_TYPE_UID = const(0x00)
 _EDDYSTONE_FRAME_TYPE_URL = const(0x10)
 _EDDYSTONE_RESERVED = const(0x00)
@@ -77,7 +78,7 @@ class EddystoneUID(Beacon):
             ]
             + [x for x in pack("<H", _EDDYSTONE_UUID)]
             + [
-                _EDDYSTONE_FRAME_LENGHT,
+                _EDDYSTONE_FRAME_LENGTH,
                 _EDDYSTONE_SERVICE_DATA,
             ]
             + [x for x in pack("<H", _EDDYSTONE_UUID)]
@@ -97,8 +98,9 @@ class EddystoneUID(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[5:]) != _EDDYSTONE_FRAME_LENGHT:
-            raise ValueError("Invalid size")
+        adv_length = len(adv_data[5:])
+        if adv_length != _EDDYSTONE_FRAME_LENGTH and adv_length != _EDDYSTONE_FRAME_LENGTH_LEGACY:
+            raise ValueError("Invalid size.")
 
         self.reference_rssi = unpack(">b", bytes([adv_data[9]]))[0]
         self.namespace = hexlify(adv_data[10:20]).decode()
