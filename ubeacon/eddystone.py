@@ -137,7 +137,7 @@ class EddystoneURL(Beacon):
                 url = url.replace(val, bytes([key]))
 
         # Length is URL length plus first 6 bytes from Eddystone URL frame
-        url_frame_lenght = len(url) + 6
+        url_frame_length = len(url) + 6
 
         return (
             [
@@ -146,7 +146,7 @@ class EddystoneURL(Beacon):
             ]
             + [x for x in pack("<H", _EDDYSTONE_UUID)]
             + [
-                url_frame_lenght,
+                url_frame_length,
                 _EDDYSTONE_SERVICE_DATA,
             ]
             + [x for x in pack("<H", _EDDYSTONE_UUID)]

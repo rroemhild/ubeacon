@@ -10,7 +10,7 @@ from . import Beacon, ubeaconDecorators
 
 
 # Length of the data frame from the manufacturer specific ADV data structure.
-_ADV_LENGHT = const(0x15)
+_ADV_LENGTH = const(0x15)
 
 
 class MikroTik(Beacon):
@@ -29,7 +29,7 @@ class MikroTik(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[1:]) != _ADV_LENGHT:
+        if len(adv_data[1:]) != _ADV_LENGTH:
             raise ValueError("Invalid size")
 
         self.version = adv_data[4]

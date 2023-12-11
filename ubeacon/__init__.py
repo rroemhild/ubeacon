@@ -6,7 +6,7 @@ from binascii import hexlify, unhexlify
 # Constants for the advertising data flags
 FLAGS_DATA = const(0x06)  # Discoverable, without BR/EDR support
 FLAGS_TYPE = const(0x01)
-FLAGS_LENGHT = const(0x02)
+FLAGS_LENGTH = const(0x02)
 
 # ADV data frame type for the manufacturer specific ADV data structure
 ADV_TYPE_MFG_DATA = const(0xFF)
@@ -96,7 +96,7 @@ class Beacon:
     def resp(self):
         """Generate response data for beacon"""
         return [
-            FLAGS_LENGHT,
+            FLAGS_LENGTH,
             FLAGS_TYPE,
             FLAGS_DATA,
             len(self.name) + 1,

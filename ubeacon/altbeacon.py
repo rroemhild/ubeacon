@@ -7,7 +7,7 @@ from struct import pack, unpack
 from . import (
     UUID,
     Beacon,
-    FLAGS_LENGHT,
+    FLAGS_LENGTH,
     FLAGS_TYPE,
     FLAGS_DATA,
     ADV_TYPE_MFG_DATA,
@@ -23,7 +23,7 @@ _COMPANY_ID = const(0x0118)
 _DEVICE_TYPE = const(0xBEAC)
 
 # Length of the data frame from the manufacturer specific ADV data structure.
-_ADV_LENGHT = const(0x1B)
+_ADV_LENGTH = const(0x1B)
 
 # Reserved for use by the manufacturer to implement special features
 _MFG_RESERVED = const(0x01)
@@ -64,10 +64,10 @@ class AltBeacon(Beacon):
         """Generate the advertising data for the AltBeacon"""
         return (
             [
-                FLAGS_LENGHT,
+                FLAGS_LENGTH,
                 FLAGS_TYPE,
                 FLAGS_DATA,
-                _ADV_LENGHT,
+                _ADV_LENGTH,
                 ADV_TYPE_MFG_DATA,
             ]
             + [x for x in self.validate(pack("<H", self.company_id), 2)]
@@ -86,7 +86,7 @@ class AltBeacon(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[1:]) != _ADV_LENGHT:
+        if len(adv_data[1:]) != _ADV_LENGTH:
             raise ValueError("Invalid size")
 
         self.company_id = unpack("<H", adv_data[2:4])[0]

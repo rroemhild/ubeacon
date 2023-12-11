@@ -7,7 +7,7 @@ from struct import pack, unpack
 from . import (
     UUID,
     Beacon,
-    FLAGS_LENGHT,
+    FLAGS_LENGTH,
     FLAGS_TYPE,
     FLAGS_DATA,
     ADV_TYPE_MFG_DATA,
@@ -22,7 +22,7 @@ _COMPANY_ID = const(0x0144)  # bytes([0x44, 0x01])
 _DEVICE_TYPE = const(0xFF03)  # bytes([0xFF, 0x03])
 
 # Length of the data frame from the manufacturer specific ADV data structure.
-_ADV_LENGHT = const(0x1B)
+_ADV_LENGTH = const(0x1B)
 
 # Value representing the average received signal strength at 1m from the advertiser
 _REFERENCE_RSSI = const(-70)
@@ -62,10 +62,10 @@ class LinTechBeacon(Beacon):
         """Generate the advertising data for the LinTech beacon"""
         return (
             [
-                FLAGS_LENGHT,
+                FLAGS_LENGTH,
                 FLAGS_TYPE,
                 FLAGS_DATA,
-                _ADV_LENGHT,
+                _ADV_LENGTH,
                 ADV_TYPE_MFG_DATA,
             ]
             + [x for x in pack("<H", _COMPANY_ID)]
@@ -84,7 +84,7 @@ class LinTechBeacon(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[1:]) != _ADV_LENGHT:
+        if len(adv_data[1:]) != _ADV_LENGTH:
             raise ValueError("Invalid size")
 
         self.uuid = str(UUID(adv_data[6:22]))
