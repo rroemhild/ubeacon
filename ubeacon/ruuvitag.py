@@ -9,6 +9,7 @@ from . import Beacon, ubeaconDecorators
 
 _DATA_FORMAT_3 = const(0x03)
 _DATA_FORMAT_5 = const(0x05)
+_RUUVITAG_ADV = b"\x99\x04"
 
 
 class RuuviTag(Beacon):
@@ -18,7 +19,7 @@ class RuuviTag(Beacon):
     @ubeaconDecorators.remove_adv_header
     def decode(self, adv_data):
         # Strip advertisement data
-        if b"\x99\x04" in adv_data[:4]:
+        if _RUUVITAG_ADV in adv_data[:4]:
             adv_data = adv_data[4:]
 
         data_format = adv_data[0]  # RuuviTag data format
