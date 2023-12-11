@@ -72,7 +72,7 @@ class Beacon:
 
     def __str__(self):
         """Convert the advertising data to a human-readable string"""
-        adv = self.adv_bytes
+        adv = self.adv_data
         return "Bytes: {:d} data: {:s}".format(len(adv), hexlify(adv))
 
     def __repr__(self):
