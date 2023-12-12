@@ -137,3 +137,26 @@ class Beacon:
             raise ValueError("Value has to be int or bytes")
 
         return _bytes
+
+
+class BeaconFilter:
+    """Beacon filter class"""
+
+    filter_types = ["uuid", "major", "minor", "namespace", "instance"]
+
+    def __init__(self, **kwargs):
+        self.properties = {}
+
+        for key, value in kwargs.items():
+            if key not in self.filter_types:
+                raise ValueError("Filter type not available.")
+            self.properties[key] = value
+
+    def match(self, beacon):
+        """Check if the filter matches the supplied properties."""
+
+        for key, value in self.properties.items():
+            if getattr(beacon, key) != value:
+                return False
+
+        return True
