@@ -1,10 +1,9 @@
 import aioble
-import uasyncio as asyncio
+import asyncio
 import bluetooth
 
-from ubinascii import hexlify
+from binascii import hexlify
 
-from ubeacon import ubeaconDecorators
 from ubeacon.lintech import LinTechBeacon
 from ubeacon.ibeacon import IBeacon
 from ubeacon.ruuvitag import RuuviTag
@@ -23,7 +22,7 @@ _EDDYSTONE_UUID = bluetooth.UUID(0xFEAA)
 _EDDYSTONE_UID = const(0x00)
 _EDDYSTONE_URL = const(0x10)
 
-_SCAN_DURATION_MS = 0
+_SCAN_DURATION_MS = const(0)
 
 
 async def scan():
@@ -56,7 +55,7 @@ async def scan():
                         beacon = MikroTik(adv_data=result.adv_data)
 
             if beacon:
-                print(f"MAC: {hexlify(result.device.addr)} Type: {beacon,!r}")
+                print(f"MAC: {hexlify(result.device.addr)} Beacon: {beacon,!r}")
 
 
 if __name__ == "__main__":
