@@ -9,5 +9,5 @@
     ["ubeacon/mikrotik.py", "github:rroemhild/ubeacon/ubeacon/mikrotik.py"]
   ],
   "deps": [],
-  "version": "0.1.0"
+  "version": "1.0.0"
 }
