@@ -99,7 +99,10 @@ class EddystoneUID(Beacon):
         Decode the received advertising data and set the corresponding attributes
         """
         adv_length = len(adv_data[5:])
-        if adv_length != _EDDYSTONE_FRAME_LENGTH and adv_length != _EDDYSTONE_FRAME_LENGTH_LEGACY:
+        if (
+            adv_length != _EDDYSTONE_FRAME_LENGTH
+            and adv_length != _EDDYSTONE_FRAME_LENGTH_LEGACY
+        ):
             raise ValueError("Invalid size.")
 
         self.reference_rssi = unpack(">b", bytes([adv_data[9]]))[0]
