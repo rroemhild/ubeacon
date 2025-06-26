@@ -60,9 +60,9 @@ class RuuviTag(Beacon):
         self.acceleration_y = unpack(">h", adv_data[9:11])[0]
         self.acceleration_z = unpack(">h", adv_data[11:13])[0]
 
-        power_bin = bin(unpack(">H", adv_data[13:15])[0])[2:]
-        self.battery_voltage = int(power_bin[:11], 2) + 1600
-        self.tx_power = int(power_bin[11:], 2) * 2 - 40
+        power = unpack(">H", adv_data[13:15])[0]
+        self.battery_voltage = (power >> 5) + 1600
+        self.tx_power = (power & 0x1F) * 2 - 40
 
         self.movement_counter = adv_data[15]
         self.measurement_sequence = unpack(">H", adv_data[16:18])[0]
