@@ -1,5 +1,7 @@
 """
-Eddystone Protocol Specification: https://github.com/google/eddystone
+Eddystone Protocol Specification
+
+https://github.com/google/eddystone
 """
 
 from struct import pack, unpack
@@ -103,7 +105,7 @@ class EddystoneUID(Beacon):
             adv_length != _EDDYSTONE_FRAME_LENGTH
             and adv_length != _EDDYSTONE_FRAME_LENGTH_LEGACY
         ):
-            raise ValueError("Invalid size.")
+            raise ValueError("Invalid size of Eddystone UID frame")
 
         self.reference_rssi = unpack(">b", bytes([adv_data[9]]))[0]
         self.namespace = hexlify(adv_data[10:20]).decode()

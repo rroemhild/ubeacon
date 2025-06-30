@@ -1,68 +1,83 @@
 """
-RuuviTag Protocol Specification: https://docs.ruuvi.com/communication/bluetooth-advertisements
+RuuviTag Protocol Specification
+
+https://docs.ruuvi.com/communication/bluetooth-advertisements
 """
 
 from struct import unpack
 
-from . import Beacon, ubeaconDecorators
+from . import Beacon
 
-
+# RuuviTag data formats
 _DATA_FORMAT_3 = const(0x03)
 _DATA_FORMAT_5 = const(0x05)
-_RUUVITAG_ADV = b"\x99\x04"
+
+# Length of the payload data in the ADV data structure for format 3 and 5
+_DATA_LENGTH_3 = const(0x0E)
+_DATA_LENGTH_5 = const(0x18)
 
 
 class RuuviTag(Beacon):
-    def __init__(self, *, adv_data):
-        self.decode(adv_data)
+    # The beacon device manufacturer's company identifier code.
+    company_id = const(0x0499)
 
-    @ubeaconDecorators.remove_adv_header
-    def decode(self, adv_data):
-        # Strip advertisement data
-        if _RUUVITAG_ADV in adv_data[:4]:
-            adv_data = adv_data[4:]
+    def __init__(self, *, data):
+        # If adv_data is provided, decode it to initialize the beacon
+        if data:
+            self.decode(data)
+        else:
+            # If no adv_data, raise an error
+            raise ValueError("Encoding is not supported)")
 
-        data_format = adv_data[0]  # RuuviTag data format
-
+    def decode(self, data):
+        data_format = data[0]
         if data_format == _DATA_FORMAT_3:
-            self.decode_data_format_3(adv_data)
+            self.decode_3(data)
         elif data_format == _DATA_FORMAT_5:
-            self.decode_data_format_5(adv_data)
+            self.decode_5(data)
+        else:
+            raise ValueError(f"Unsupported data format: {data_format}")
 
-    def decode_data_format_3(self, adv_data):
-        """Data format 3 (RAWv1)"""
+    def decode_3(self, data):
+        """Decode data format 3 (RAWv1)"""
+        if len(data) != _DATA_LENGTH_3:
+            raise ValueError("Invalid payload data size")
+
         self.data_format = _DATA_FORMAT_3
 
-        self.humidity = adv_data[1] / 2
+        self.humidity = data[1] / 2
 
-        temperature = adv_data[2] + adv_data[3] / 100
-        if temperature > 128:
-            temperature -= 128
-            temperature = round(0 - temperature, 2)
-        self.temperature = temperature
+        temp = data[2] + data[3] / 100
+        if temp > 128:
+            temp -= 128
+            temp = round(0 - temp, 2)
+        self.temperature = temp
 
-        self.pressure = unpack(">H", adv_data[4:6])[0] + 50000
+        self.pressure = unpack(">H", data[4:6])[0] + 50000
 
-        self.acceleration_x = unpack(">h", adv_data[6:8])[0]
-        self.acceleration_y = unpack(">h", adv_data[8:10])[0]
-        self.acceleration_z = unpack(">h", adv_data[10:12])[0]
-        self.battery_voltage = unpack(">H", adv_data[12:14])[0]
+        self.acceleration_x = unpack(">h", data[6:8])[0]
+        self.acceleration_y = unpack(">h", data[8:10])[0]
+        self.acceleration_z = unpack(">h", data[10:12])[0]
+        self.battery_voltage = unpack(">H", data[12:14])[0]
 
-    def decode_data_format_5(self, adv_data):
-        """Data format 5 (RAWv2)"""
+    def decode_5(self, data):
+        """Decode data format 5 (RAWv2)"""
+        if len(data) != _DATA_LENGTH_5:
+            raise ValueError("Invalid payload data size")
+
         self.data_format = _DATA_FORMAT_5
 
-        self.temperature = unpack(">h", adv_data[1:3])[0] * 0.005
-        self.humidity = unpack(">H", adv_data[3:5])[0] * 0.0025
-        self.pressure = unpack(">H", adv_data[5:7])[0] + 50000
+        self.temperature = unpack(">h", data[1:3])[0] * 0.005
+        self.humidity = unpack(">H", data[3:5])[0] * 0.0025
+        self.pressure = unpack(">H", data[5:7])[0] + 50000
 
-        self.acceleration_x = unpack(">h", adv_data[7:9])[0]
-        self.acceleration_y = unpack(">h", adv_data[9:11])[0]
-        self.acceleration_z = unpack(">h", adv_data[11:13])[0]
+        self.acceleration_x = unpack(">h", data[7:9])[0]
+        self.acceleration_y = unpack(">h", data[9:11])[0]
+        self.acceleration_z = unpack(">h", data[11:13])[0]
 
-        power = unpack(">H", adv_data[13:15])[0]
+        power = unpack(">H", data[13:15])[0]
         self.battery_voltage = (power >> 5) + 1600
         self.tx_power = (power & 0x1F) * 2 - 40
 
-        self.movement_counter = adv_data[15]
-        self.measurement_sequence = unpack(">H", adv_data[16:18])[0]
+        self.movement_counter = data[15]
+        self.measurement_sequence = unpack(">H", data[16:18])[0]

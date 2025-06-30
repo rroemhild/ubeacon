@@ -33,19 +33,6 @@ def _unique_id():
         return hexlify(machine.unique_id()[4:]).upper()
 
 
-class ubeaconDecorators:
-    @classmethod
-    def remove_adv_header(cls, decorated):
-        """Decorator to remove the ADV data flags header if any"""
-
-        def inner(cls, adv_data):
-            if adv_data[:2] == bytes([0x02, 0x01]):
-                adv_data = adv_data[3:]
-            decorated(cls, adv_data)
-
-        return inner
-
-
 class UUID:
     def __init__(self, bytes):
         if len(bytes) != 16:
@@ -149,7 +136,7 @@ class BeaconFilter:
 
         for key, value in kwargs.items():
             if key not in self.filter_types:
-                raise ValueError("Filter type not available.")
+                raise ValueError("Filter type not available")
             self.properties[key] = value
 
     def match(self, beacon):

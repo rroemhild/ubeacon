@@ -1,5 +1,7 @@
 """
-LinTech Beacon Protocol Specification: https://www.lintech.de/support/downloads/bluetooth-low-energy-smart-beacon/
+LinTech Beacon Protocol Specification
+
+https://www.lintech.de/support/downloads/bluetooth-low-energy-smart-beacon/
 """
 
 from struct import pack, unpack
@@ -11,18 +13,17 @@ from . import (
     FLAGS_TYPE,
     FLAGS_DATA,
     ADV_TYPE_MFG_DATA,
-    ubeaconDecorators,
 )
 
-
-# The beacon device manufacturer's company identifier code.
-_COMPANY_ID = const(0x0144)  # bytes([0x44, 0x01])
 
 # LinTech beacon advertisement code
 _DEVICE_TYPE = const(0xFF03)  # bytes([0xFF, 0x03])
 
 # Length of the data frame from the manufacturer specific ADV data structure.
 _ADV_LENGTH = const(0x1B)
+
+# Length of the payload data in the ADV data structure.
+_DATA_LENGTH = const(0x18)
 
 # Value representing the average received signal strength at 1m from the advertiser
 _REFERENCE_RSSI = const(-70)
@@ -35,6 +36,9 @@ _TX_BAT_STATUS = const(0xFC)
 
 
 class LinTechBeacon(Beacon):
+    # The beacon device manufacturer's company identifier code.
+    company_id = const(0x0144)
+
     def __init__(
         self,
         uuid=_PROXIMITY_UUID,  # 16-bytes
@@ -42,11 +46,11 @@ class LinTechBeacon(Beacon):
         minor=None,  # 0 - 65535
         reference_rssi=_REFERENCE_RSSI,  # 1-byte
         *,
-        adv_data=None,
+        data=None,
     ):
         # If adv_data is provided, decode it to initialize the beacon
-        if adv_data:
-            self.decode(adv_data)
+        if data:
+            self.decode(data)
         # If major and minor are provided, use them to initialize the beacon
         elif major and minor:
             self.uuid = uuid
@@ -68,7 +72,7 @@ class LinTechBeacon(Beacon):
                 _ADV_LENGTH,
                 ADV_TYPE_MFG_DATA,
             ]
-            + [x for x in pack("<H", _COMPANY_ID)]
+            + [x for x in pack("<H", self.company_id)]
             + [x for x in pack(">H", _DEVICE_TYPE)]
             + [x for x in self.validate(self.uuid_to_bin(self.uuid), 16)]
             + [x for x in self.validate(pack(">H", self.major), 2)]
@@ -79,17 +83,16 @@ class LinTechBeacon(Beacon):
             ]
         )
 
-    @ubeaconDecorators.remove_adv_header
-    def decode(self, adv_data):
+    def decode(self, data):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[1:]) != _ADV_LENGTH:
-            raise ValueError("Invalid size")
+        if len(data) != _DATA_LENGTH:
+            raise ValueError("Invalid payload data size")
 
-        self.uuid = str(UUID(adv_data[6:22]))
-        self.major = unpack(">H", adv_data[22:24])[0]
-        self.minor = unpack(">H", adv_data[24:26])[0]
-        self.reference_rssi = unpack(">b", bytes([adv_data[26]]))[0]
-        self.tx_power = adv_data[27] & 0b111
-        self.battery_level = adv_data[27] >> 3
+        self.uuid = str(UUID(data[2:18]))
+        self.major = unpack(">H", data[18:20])[0]
+        self.minor = unpack(">H", data[20:22])[0]
+        self.reference_rssi = unpack(">b", bytes([data[22]]))[0]
+        self.tx_power = data[23] & 0b111
+        self.battery_level = data[23] >> 3

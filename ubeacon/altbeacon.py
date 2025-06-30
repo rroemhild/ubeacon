@@ -1,5 +1,7 @@
 """
-AltBeacon Protocol Specification: https://github.com/AltBeacon/spec
+AltBeacon Protocol Specification
+
+https://github.com/AltBeacon/spec
 """
 
 from struct import pack, unpack
@@ -11,7 +13,6 @@ from . import (
     FLAGS_TYPE,
     FLAGS_DATA,
     ADV_TYPE_MFG_DATA,
-    ubeaconDecorators,
 )
 
 
@@ -24,6 +25,9 @@ _DEVICE_TYPE = const(0xBEAC)
 
 # Length of the data frame from the manufacturer specific ADV data structure.
 _ADV_LENGTH = const(0x1B)
+
+# Length of the payload data in the ADV data structure.
+_DATA_LENGTH = const(0x18)
 
 # Reserved for use by the manufacturer to implement special features
 _MFG_RESERVED = const(0x01)
@@ -42,11 +46,12 @@ class AltBeacon(Beacon):
         reference_rssi=_REFERENCE_RSSI,  # average received signal strength at 1m
         mfg_reserved=_MFG_RESERVED,  # 1-byte
         *,
-        adv_data=None,
+        data=None,
     ):
         # If adv_data is provided, decode it to initialize the beacon
-        if adv_data:
-            self.decode(adv_data)
+        if data:
+            self.company_id = company_id
+            self.decode(data)
         # If uuid, major and minor are provided, use them to initialize the beacon
         elif uuid and major and minor:
             self.company_id = company_id
@@ -81,17 +86,15 @@ class AltBeacon(Beacon):
             ]
         )
 
-    @ubeaconDecorators.remove_adv_header
-    def decode(self, adv_data):
+    def decode(self, data):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        if len(adv_data[1:]) != _ADV_LENGTH:
-            raise ValueError("Invalid size")
+        if len(data) != _DATA_LENGTH:
+            raise ValueError("Invalid payload data size")
 
-        self.company_id = unpack("<H", adv_data[2:4])[0]
-        self.uuid = str(UUID(adv_data[6:22]))
-        self.major = unpack(">H", adv_data[22:24])[0]
-        self.minor = unpack(">H", adv_data[24:26])[0]
-        self.reference_rssi = unpack(">b", bytes([adv_data[26]]))[0]
-        self.mfg_reserved = adv_data[27]
+        self.uuid = str(UUID(data[2:18]))
+        self.major = unpack(">H", data[18:20])[0]
+        self.minor = unpack(">H", data[20:22])[0]
+        self.reference_rssi = unpack(">b", bytes([data[22]]))[0]
+        self.mfg_reserved = data[23]

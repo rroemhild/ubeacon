@@ -7,6 +7,7 @@ from ubeacon.mikrotik import MikroTik
 from ubeacon.ruuvitag import RuuviTag
 from ubeacon.altbeacon import AltBeacon
 from ubeacon.eddystone import EddystoneUID, EddystoneURL
+from ubeacon.sgwireless import SGWirelessCAPT
 
 
 class ValidationTest(unittest.TestCase):
@@ -51,7 +52,7 @@ class AltBeaconTest(unittest.TestCase):
         self.assertEqual(beacon.adv_data, self.adv_data)
 
     def test_decode(self):
-        beacon = AltBeacon(adv_data=self.adv_data)
+        beacon = AltBeacon(company_id=self.company_id, data=self.adv_data[7:])
         self.assertEqual(beacon.company_id, self.company_id)
         self.assertEqual(beacon.uuid, self.uuid)
         self.assertEqual(beacon.major, self.major)
@@ -79,7 +80,7 @@ class IBeaconTest(unittest.TestCase):
         self.assertEqual(beacon.adv_data, self.adv_data)
 
     def test_decode(self):
-        beacon = IBeacon(adv_data=self.adv_data)
+        beacon = IBeacon(data=self.adv_data[7:])
         self.assertEqual(beacon.uuid, self.uuid)
         self.assertEqual(beacon.major, self.major)
         self.assertEqual(beacon.minor, self.minor)
@@ -104,7 +105,7 @@ class LinTechBeaconTest(unittest.TestCase):
         self.assertEqual(beacon.adv_data, self.adv_data)
 
     def test_decode(self):
-        beacon = LinTechBeacon(adv_data=self.adv_data)
+        beacon = LinTechBeacon(data=self.adv_data[7:])
         self.assertEqual(beacon.uuid, self.uuid)
         self.assertEqual(beacon.major, self.major)
         self.assertEqual(beacon.minor, self.minor)
@@ -166,10 +167,10 @@ class EddystoneUrlTest(unittest.TestCase):
 
 class RuuviTagTest(unittest.TestCase):
 
-    adv_data_v5 = b"\x02\x01\x06\x1b\xff\x99\x04\x05\x12\xfcS\x94\xc3|\x00\x04\xff\xfc\x04\x0c\xac6B\x00\xcd\xcb\xb83L\x88O"
+    data_v5 = b"\x05\x12\xfcS\x94\xc3|\x00\x04\xff\xfc\x04\x0c\xac6B\x00\xcd\xcb\xb83L\x88O"
 
     def test_decode_df_5(self):
-        beacon = RuuviTag(adv_data=self.adv_data_v5)
+        beacon = RuuviTag(data=self.data_v5)
         self.assertEqual(beacon.data_format, 5)
         self.assertEqual(beacon.temperature, 24.3)
         self.assertEqual(beacon.humidity, 53.49)
@@ -182,10 +183,10 @@ class RuuviTagTest(unittest.TestCase):
         self.assertEqual(beacon.movement_counter, 66)
         self.assertEqual(beacon.measurement_sequence, 205)
 
-    adv_data_v3 = b"\x03)\x1a\x1e\xce\x1e\xfc\x18\xf9B\x02\xca\x0bS"
+    data_v3 = b"\x03)\x1a\x1e\xce\x1e\xfc\x18\xf9B\x02\xca\x0bS"
 
     def test_decode_df_3(self):
-        beacon = RuuviTag(adv_data=self.adv_data_v3)
+        beacon = RuuviTag(data=self.data_v3)
         self.assertEqual(beacon.data_format, 3)
         self.assertEqual(beacon.temperature, 26.3)
         self.assertEqual(beacon.humidity, 20.5)
@@ -201,7 +202,7 @@ class MikroTikBeaconTest(unittest.TestCase):
     adv_data = b"\x02\x01\x06\x15\xffO\t\x01\x00\xce\xa6\x00\x00\x00\x00\x02\x00\xa0\x1c\x91\x08W\x00\x00_"
 
     def test_decode(self):
-        beacon = MikroTik(adv_data=self.adv_data)
+        beacon = MikroTik(data=self.adv_data[7:])
         self.assertEqual(beacon.encrypted, 0)
         self.assertEqual(beacon.acceleration_x, 0)
         self.assertEqual(beacon.acceleration_y, 0)
