@@ -213,5 +213,16 @@ class MikroTikBeaconTest(unittest.TestCase):
         self.assertEqual(beacon.battery, 95)
 
 
+class SGWirelessCAPTTest(unittest.TestCase):
+
+    adv_data = b"\x03\x19\x00\x02\x02\x01\x06\x0b\xffY\x00\xac\x07\xd6\x17c\x00\x00\x00\x06\tCAP/T"
+
+    def test_decode(self):
+        beacon = SGWirelessCAPT(data=self.adv_data[11:19])
+        self.assertEqual(beacon.temperature, 19.64)
+        self.assertEqual(beacon.humidity, 61.02)
+        self.assertEqual(beacon.battery, 99)
+
+
 if __name__ == "__main__":
     unittest.main()

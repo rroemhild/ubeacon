@@ -6,8 +6,9 @@
     ["ubeacon/ibeacon.py", "github:rroemhild/ubeacon/ubeacon/ibeacon.py"],
     ["ubeacon/lintech.py", "github:rroemhild/ubeacon/ubeacon/lintech.py"],
     ["ubeacon/ruuvitag.py", "github:rroemhild/ubeacon/ubeacon/ruuvitag.py"],
-    ["ubeacon/mikrotik.py", "github:rroemhild/ubeacon/ubeacon/mikrotik.py"]
+    ["ubeacon/mikrotik.py", "github:rroemhild/ubeacon/ubeacon/mikrotik.py"],
+    ["ubeacon/sgwireless.py", "github:rroemhild/ubeacon/ubeacon/sgwireless.py"]
   ],
   "deps": [],
-  "version": "2.0.0"
+  "version": "2.0.0-dev"
 }
