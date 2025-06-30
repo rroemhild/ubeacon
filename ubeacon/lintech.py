@@ -64,24 +64,21 @@ class LinTechBeacon(Beacon):
     @property
     def adv(self):
         """Generate the advertising data for the LinTech beacon"""
-        return (
-            [
-                FLAGS_LENGTH,
-                FLAGS_TYPE,
-                FLAGS_DATA,
-                _ADV_LENGTH,
-                ADV_TYPE_MFG_DATA,
-            ]
-            + [x for x in pack("<H", self.company_id)]
-            + [x for x in pack(">H", _DEVICE_TYPE)]
-            + [x for x in self.validate(self.uuid_to_bin(self.uuid), 16)]
-            + [x for x in self.validate(pack(">H", self.major), 2)]
-            + [x for x in self.validate(pack(">H", self.minor), 2)]
-            + [
-                self.validate(pack(">b", self.reference_rssi), 1)[0],
-                _TX_BAT_STATUS,
-            ]
-        )
+        adv = bytearray((
+            FLAGS_LENGTH,
+            FLAGS_TYPE,
+            FLAGS_DATA,
+            _ADV_LENGTH,
+            ADV_TYPE_MFG_DATA,
+        ))
+        adv.extend(pack("<H", self.company_id))
+        adv.extend(pack(">H", _DEVICE_TYPE))
+        adv.extend(self.validate(self.uuid_to_bin(self.uuid), 16))
+        adv.extend(self.validate(pack(">H", self.major), 2))
+        adv.extend(self.validate(pack(">H", self.minor), 2))
+        adv.extend(self.validate(pack(">b", self.reference_rssi), 1))
+        adv.append(_TX_BAT_STATUS)
+        return adv
 
     def decode(self, data):
         """

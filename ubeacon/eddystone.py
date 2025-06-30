@@ -73,28 +73,21 @@ class EddystoneUID(Beacon):
     @property
     def adv(self):
         """Generate the advertising data for the EddystoneUID beacon"""
-        return (
-            [
-                _SERVICE_LENGTH,
-                _SERVICE_UUID_TYPES,
-            ]
-            + [x for x in pack("<H", _EDDYSTONE_UUID)]
-            + [
-                _EDDYSTONE_FRAME_LENGTH,
-                _EDDYSTONE_SERVICE_DATA,
-            ]
-            + [x for x in pack("<H", _EDDYSTONE_UUID)]
-            + [
-                _EDDYSTONE_FRAME_TYPE_UID,
-                self.validate(pack(">b", self.reference_rssi), 1)[0],
-            ]
-            + [x for x in self.validate(unhexlify(self.namespace), 10)]
-            + [x for x in self.validate(unhexlify(self.instance), 6)]
-            + [
-                _EDDYSTONE_RESERVED,
-                _EDDYSTONE_RESERVED,
-            ]
-        )
+        adv = bytearray((
+            _SERVICE_LENGTH,
+            _SERVICE_UUID_TYPES,
+        ))
+        adv.extend(pack("<H", _EDDYSTONE_UUID))
+        adv.append(_EDDYSTONE_FRAME_LENGTH)
+        adv.append(_EDDYSTONE_SERVICE_DATA)
+        adv.extend(pack("<H", _EDDYSTONE_UUID))
+        adv.append(_EDDYSTONE_FRAME_TYPE_UID)
+        adv.extend(self.validate(pack(">b", self.reference_rssi), 1))
+        adv.extend(self.validate(unhexlify(self.namespace), 10))
+        adv.extend(self.validate(unhexlify(self.instance), 6))
+        adv.append(_EDDYSTONE_RESERVED)
+        adv.append(_EDDYSTONE_RESERVED)
+        return adv
 
     def decode(self, adv_data):
         """
@@ -144,24 +137,19 @@ class EddystoneURL(Beacon):
         # Length is URL length plus first 6 bytes from Eddystone URL frame
         url_frame_length = len(url) + 6
 
-        return (
-            [
-                _SERVICE_LENGTH,
-                _SERVICE_UUID_TYPES,
-            ]
-            + [x for x in pack("<H", _EDDYSTONE_UUID)]
-            + [
-                url_frame_length,
-                _EDDYSTONE_SERVICE_DATA,
-            ]
-            + [x for x in pack("<H", _EDDYSTONE_UUID)]
-            + [
-                _EDDYSTONE_FRAME_TYPE_URL,
-                self.validate(self.reference_rssi, 1)[0],
-                url_scheme,
-            ]
-            + [x for x in url]
-        )
+        adv = bytearray([
+            _SERVICE_LENGTH,
+            _SERVICE_UUID_TYPES,
+        ])
+        adv.extend(pack("<H", _EDDYSTONE_UUID))
+        adv.append(url_frame_length)
+        adv.append(_EDDYSTONE_SERVICE_DATA)
+        adv.extend(pack("<H", _EDDYSTONE_UUID))
+        adv.append(_EDDYSTONE_FRAME_TYPE_URL)
+        adv.extend(self.validate(pack(">b", self.reference_rssi), 1))
+        adv.append(url_scheme)
+        adv.extend(url)
+        return adv
 
     def decode(self, adv_data):
         """
