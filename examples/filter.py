@@ -7,7 +7,6 @@ from ubeacon import BeaconFilter
 from ubeacon.ibeacon import IBeacon
 
 
-_IBEACON_UUID = const(0x004C)
 _SCAN_DURATION_MS = const(0)
 
 
@@ -21,13 +20,13 @@ async def scan():
 
     async with aioble.scan(_SCAN_DURATION_MS) as scanner:
         async for result in scanner:
-            for mfg_id, _ in result.manufacturer():
-                if mfg_id == _IBEACON_UUID:
-                    beacon = IBeacon(adv_data=result.adv_data)
+            for mfg_id, mfg_data in result.manufacturer():
+                if mfg_id == IBeacon.company_id:
+                    beacon = IBeacon(data=mfg_data)
 
                     # Proceed if the beacon match the filter
                     if beacon_filter.match(beacon):
-                        print(f"MAC: {hexlify(result.device.addr)} Beacon: {beacon,!r}")
+                        print(f"MAC: {hexlify(result.device.addr_hex())} Beacon: {beacon,!r}")
 
 
 if __name__ == "__main__":

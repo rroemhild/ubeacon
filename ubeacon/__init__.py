@@ -129,21 +129,16 @@ class Beacon:
 class BeaconFilter:
     """Beacon filter class"""
 
-    filter_types = ["uuid", "major", "minor", "namespace", "instance"]
+    filter_types = {"uuid", "major", "minor", "namespace", "instance"}
 
     def __init__(self, **kwargs):
-        self.properties = {}
-
-        for key, value in kwargs.items():
-            if key not in self.filter_types:
-                raise ValueError("Filter type not available")
-            self.properties[key] = value
+        # Only keep valid filter keys
+        self.properties = {k: v for k, v in kwargs.items() if k in self.filter_types}
+        # Raise error if any invalid keys are present
+        invalid = set(kwargs) - self.filter_types
+        if invalid:
+            raise ValueError(f"Filter type(s) not available: {', '.join(invalid)}")
 
     def match(self, beacon):
         """Check if the filter matches the supplied properties."""
-
-        for key, value in self.properties.items():
-            if getattr(beacon, key) != value:
-                return False
-
-        return True
+        return all(getattr(beacon, k, None) == v for k, v in self.properties.items())
