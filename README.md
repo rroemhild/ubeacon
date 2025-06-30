@@ -8,9 +8,10 @@ Supported BLE beacons:
 * Eddystone-UID
 * Eddystone-URL
 * iBeacon
-* LinTech Beacon
-* RuuviTag (decode only)
+* LinTech
 * MikroTik (decode only)
+* RuuviTag (decode only)
+* SG Wireless CAP/T (decode only)
 
 
 ## Installation
@@ -62,13 +63,34 @@ ble.gap_advertise(250_000, adv_data=beacon.adv_data, resp_data=beacon.resp_bytes
 
 ### Decode Beacon
 
-To decode a beacon, you first need to obtain the beacon data from a scan result. The data is typically stored in a format like `adv_data`. For example:
+To decode a beacon, start by extracting the payload data from a scan result. For most beacon types supported by this library (with the exception of the Eddystone class), you need to pass the manufacturer data to the corresponding beacon class. In MicroPython, you can retrieve this data using `result.manufacturer()`.
+
+#### Async Scan Example
+
+For a complete example that demonstrates asynchronous scanning, see `examples/sync_async.py`.
+
+```python
+import aioble
+import asyncio
+
+async def scan():
+    async with aioble.scan(10000, interval_us=30000, window_us=30000, active=False) as scanner:
+        async for result in scanner:
+            for mfg_id, mfg_data in result.manufacturer():
+                print(f"MAC:{result.device.addr_hex()} MFG_ID:{mfg_id} MFG_DATA:{mfg_data}")
+
+asyncio.run(scan())
+```
+
+#### Decode Example: AltBeacon
+
+The following example shows how to decode an AltBeacon by passing the extracted mfg_data to the AltBeacon class:
 
 ```python
 from ubeacon.altbeacon import AltBeacon
 
-adv_data = b"\x02\x01\x06\x1b\xff9\x05\xbe\xac=\xf9=Z\xa1\xf2G\xbb\xa3\xcf>I\xe6\xa8\x9b\xb6\x00\x11\x00*\xbb#"
-beacon = AltBeacon(adv_data=adv_data)
+payload_data = b'\xbe\xac=\xf9=Z\xa1\xf2G\xbb\xa3\xcf>I\xe6\xa8\x9b\xb6\x00\x11\x00*\xbb#'  # Example mfg_data from ADV
+beacon = AltBeacon(data=payload_data)
 print(f"{beacon,!r}")
 ```
 
