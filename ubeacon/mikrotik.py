@@ -35,19 +35,33 @@ class MikroTik(Beacon):
         Decode the received advertising data and set the corresponding attributes
         """
         if len(data) != _DATA_LENGTH:
-            raise ValueError("Invalid size")
+            raise ValueError("Invalid payload data size")
 
-        self.version = data[0]
-        self.encrypted = bool(data[1])
-        self.salt = unpack("<H", data[2:4])[0]
-        self.acceleration_x = unpack("<H", data[4:6])[0] / 256
-        self.acceleration_y = unpack("<H", data[6:8])[0] / 256
-        self.acceleration_z = unpack("<H", data[8:10])[0] / 256
+        # Unpack all fields at once for efficiency
+        (
+            version,
+            encrypted,
+            salt,
+            acc_x,
+            acc_y,
+            acc_z,
+            temp_raw,
+            uptime,
+            trigger,
+            bat
+        ) = unpack("<BBHHHHhIBB", data)
 
-        temperature = unpack("<h", data[10:12])[0] / 256
-        if temperature != -128.0:
-            self.temperature = temperature
+        self.version = version
+        self.encrypted = bool(encrypted)
+        self.salt = salt
+        self.acceleration_x = acc_x / 256
+        self.acceleration_y = acc_y / 256
+        self.acceleration_z = acc_z / 256
 
-        self.uptime = unpack("<I", data[12:16])[0]
-        self.trigger = data[16]
-        self.battery = data[17]
+        t = temp_raw / 256
+        if t != -128.0:
+            self.temperature = t
+
+        self.uptime = uptime
+        self.trigger = trigger
+        self.battery = bat

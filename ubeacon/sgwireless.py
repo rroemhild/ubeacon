@@ -35,10 +35,12 @@ class SGWirelessCAPT(Beacon):
         Decode the received advertising data and set the corresponding attributes
         """
         if len(data) == 7:
-            pass # Unsuported Type 2 frame with firmware version
-        elif len(data) != _DATA_LENGTH:
-            raise ValueError(f"Invalid payload data size")
-        else:
-            self.temperature = unpack("<h", data[0:2])[0] / 100
-            self.humidity = unpack("<H", data[2:4])[0] / 100
-            self.battery = data[4]
+            # Unsupported Type 2 frame with firmware version
+            return
+        if len(data) != _DATA_LENGTH:
+            raise ValueError("Invalid payload data size")
+
+        temp_raw, hum_raw = unpack("<hH", data[:4])
+        self.temperature = temp_raw / 100
+        self.humidity = hum_raw / 100
+        self.battery = data[4]

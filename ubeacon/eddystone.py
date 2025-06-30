@@ -107,7 +107,7 @@ class EddystoneUID(Beacon):
         ):
             raise ValueError("Invalid size of Eddystone UID frame")
 
-        self.reference_rssi = unpack(">b", bytes([adv_data[9]]))[0]
+        self.reference_rssi = unpack(">b", adv_data[9:10])[0]
         self.namespace = hexlify(adv_data[10:20]).decode()
         self.instance = hexlify(adv_data[20:26]).decode()
 
@@ -167,20 +167,25 @@ class EddystoneURL(Beacon):
         """
         Decode the received advertising data and set the corresponding attributes
         """
-        url = b""
-
-        # Only Eddystone URL frame
+        # Skip the first 4 bytes (service data header)
         adv_data = adv_data[4:]
         frame_length = adv_data[0]
 
-        # Join the URL together
-        url += _URL_SCHEME[adv_data[6]]
+        # Extract URL scheme and encoded URL
+        scheme_idx = adv_data[6]
+        url = bytearray(_URL_SCHEME[scheme_idx])
         url += adv_data[7 : frame_length + 1]
 
-        # Replace TLD ID if any
-        for byte in url:
-            if byte <= 13:
-                url = url.replace(bytes([byte]), _URL_TLD[byte])
+        # Replace TLD IDs with actual TLDs
+        i = 0
+        while i < len(url):
+            byte = url[i]
+            if 0 <= byte <= 13:
+                tld = _URL_TLD[byte]
+                url[i:i+1] = tld
+                i += len(tld)
+            else:
+                i += 1
 
         self.url = url.decode()
         self.reference_rssi = unpack(">b", bytes([adv_data[5]]))[0]

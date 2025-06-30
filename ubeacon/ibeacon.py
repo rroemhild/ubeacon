@@ -84,6 +84,4 @@ class IBeacon(Beacon):
             raise ValueError("Invalid payload data size")
 
         self.uuid = str(UUID(data[2:18]))
-        self.major = unpack(">H", data[18:20])[0]
-        self.minor = unpack(">H", data[20:22])[0]
-        self.reference_rssi = unpack(">b", bytes([data[22]]))[0]
+        self.major, self.minor, self.reference_rssi = unpack(">HHb", data[18:23])

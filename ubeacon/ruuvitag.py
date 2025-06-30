@@ -45,20 +45,31 @@ class RuuviTag(Beacon):
 
         self.data_format = _DATA_FORMAT_3
 
-        self.humidity = data[1] / 2
+        (
+            hum_raw,
+            temp_int,
+            temp_frac,
+            pres_raw,
+            acc_x,
+            acc_y,
+            acc_z,
+            bat_v
+        ) = unpack(">BBBHhhhH", data[1:14])
 
-        temp = data[2] + data[3] / 100
-        if temp > 128:
-            temp -= 128
-            temp = round(0 - temp, 2)
-        self.temperature = temp
+        self.humidity = hum_raw / 2
 
-        self.pressure = unpack(">H", data[4:6])[0] + 50000
+        t = temp_int + temp_frac / 100
+        if t > 128:
+            t -= 128
+            t = round(0 - t, 2)
+        self.temperature = t
 
-        self.acceleration_x = unpack(">h", data[6:8])[0]
-        self.acceleration_y = unpack(">h", data[8:10])[0]
-        self.acceleration_z = unpack(">h", data[10:12])[0]
-        self.battery_voltage = unpack(">H", data[12:14])[0]
+        self.pressure = pres_raw + 50000
+
+        self.acceleration_x = acc_x
+        self.acceleration_y = acc_y
+        self.acceleration_z = acc_z
+        self.battery_voltage = bat_v
 
     def decode_5(self, data):
         """Decode data format 5 (RAWv2)"""
@@ -67,17 +78,28 @@ class RuuviTag(Beacon):
 
         self.data_format = _DATA_FORMAT_5
 
-        self.temperature = unpack(">h", data[1:3])[0] * 0.005
-        self.humidity = unpack(">H", data[3:5])[0] * 0.0025
-        self.pressure = unpack(">H", data[5:7])[0] + 50000
+        (
+            temp_raw,
+            hum_raw,
+            pres_raw,
+            acc_x,
+            acc_y,
+            acc_z,
+            power,
+            mov,
+            seq
+        ) = unpack(">hHHhhhHBH", data[1:18])
 
-        self.acceleration_x = unpack(">h", data[7:9])[0]
-        self.acceleration_y = unpack(">h", data[9:11])[0]
-        self.acceleration_z = unpack(">h", data[11:13])[0]
+        self.temperature = temp_raw * 0.005
+        self.humidity = hum_raw * 0.0025
+        self.pressure = pres_raw + 50000
 
-        power = unpack(">H", data[13:15])[0]
+        self.acceleration_x = acc_x
+        self.acceleration_y = acc_y
+        self.acceleration_z = acc_z
+
         self.battery_voltage = (power >> 5) + 1600
         self.tx_power = (power & 0x1F) * 2 - 40
 
-        self.movement_counter = data[15]
-        self.measurement_sequence = unpack(">H", data[16:18])[0]
+        self.movement_counter = mov
+        self.measurement_sequence = seq

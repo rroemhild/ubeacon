@@ -94,7 +94,4 @@ class AltBeacon(Beacon):
             raise ValueError("Invalid payload data size")
 
         self.uuid = str(UUID(data[2:18]))
-        self.major = unpack(">H", data[18:20])[0]
-        self.minor = unpack(">H", data[20:22])[0]
-        self.reference_rssi = unpack(">b", bytes([data[22]]))[0]
-        self.mfg_reserved = data[23]
+        self.major, self.minor, self.reference_rssi, self.mfg_reserved = unpack(">HHbB", data[18:24])

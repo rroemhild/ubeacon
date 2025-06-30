@@ -91,8 +91,6 @@ class LinTechBeacon(Beacon):
             raise ValueError("Invalid payload data size")
 
         self.uuid = str(UUID(data[2:18]))
-        self.major = unpack(">H", data[18:20])[0]
-        self.minor = unpack(">H", data[20:22])[0]
-        self.reference_rssi = unpack(">b", bytes([data[22]]))[0]
-        self.tx_power = data[23] & 0b111
-        self.battery_level = data[23] >> 3
+        self.major, self.minor, self.reference_rssi, status = unpack(">HHbB", data[18:24])
+        self.tx_power = status & 0b111
+        self.battery_level = status >> 3
