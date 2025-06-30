@@ -1,6 +1,6 @@
 import unittest
 
-from ubeacon import Beacon, BeaconFilter
+from ubeacon import Beacon, BeaconFilter, FLAGS_LENGTH, FLAGS_TYPE, FLAGS_DATA
 from ubeacon.lintech import LinTechBeacon
 from ubeacon.ibeacon import IBeacon
 from ubeacon.mikrotik import MikroTik
@@ -256,6 +256,28 @@ class BeaconFilterTest(unittest.TestCase):
         beacon = self.beacon
         f = BeaconFilter(uuid="1234", minor=2)
         self.assertFalse(f.match(beacon))
+
+
+class DummyBeacon(Beacon):
+    name = b"ubeacon test"
+    @property
+    def adv(self):
+        return b"\x01\x02"
+
+class BeaconRespTest(unittest.TestCase):
+    def test_resp(self):
+        beacon = DummyBeacon()
+        resp = beacon.resp
+
+        # Check header fields
+        self.assertEqual(resp[0], FLAGS_LENGTH)
+        self.assertEqual(resp[1], FLAGS_TYPE)
+        self.assertEqual(resp[2], FLAGS_DATA)
+        self.assertEqual(resp[3], len(beacon.name) + 1)
+        self.assertEqual(resp[4], 0x09)  # _ADV_TYPE_COMPLETE_NAME
+
+        # Check name bytes
+        self.assertEqual(resp[5:], list(beacon.name))
 
 
 if __name__ == "__main__":

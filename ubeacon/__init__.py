@@ -82,13 +82,14 @@ class Beacon:
     @property
     def resp(self):
         """Generate response data for beacon"""
+        name = self.name
         return [
             FLAGS_LENGTH,
             FLAGS_TYPE,
             FLAGS_DATA,
-            len(self.name) + 1,
+            len(name) + 1,
             _ADV_TYPE_COMPLETE_NAME,
-        ] + [x for x in self.name]
+        ] + list(name)
 
     @property
     def resp_bytes(self):
