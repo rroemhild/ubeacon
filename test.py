@@ -1,6 +1,6 @@
 import unittest
 
-from ubeacon import Beacon
+from ubeacon import Beacon, BeaconFilter
 from ubeacon.lintech import LinTechBeacon
 from ubeacon.ibeacon import IBeacon
 from ubeacon.mikrotik import MikroTik
@@ -222,6 +222,40 @@ class SGWirelessCAPTTest(unittest.TestCase):
         self.assertEqual(beacon.temperature, 19.64)
         self.assertEqual(beacon.humidity, 61.02)
         self.assertEqual(beacon.battery, 99)
+
+
+class BeaconFilterTest(unittest.TestCase):
+    uuid = "acbdf5ff-d272-45f5-8e45-01672fe51c47"
+    uuid2 = "12345678-1234-5678-1234-567812345678"
+
+    beacon = IBeacon(
+        uuid=uuid,
+        major=1,
+        minor=2
+    )
+
+    def test_match_uuid(self):
+        beacon = self.beacon
+        f = BeaconFilter(uuid=self.uuid)
+        self.assertTrue(f.match(beacon))
+        f2 = BeaconFilter(uuid=self.uuid2)
+        self.assertFalse(f2.match(beacon))
+
+    def test_match_multiple(self):
+        beacon = self.beacon
+        f = BeaconFilter(uuid=self.uuid, major=1)
+        self.assertTrue(f.match(beacon))
+        f2 = BeaconFilter(uuid=self.uuid, major=2)
+        self.assertFalse(f2.match(beacon))
+
+    def test_invalid_filter_key(self):
+        with self.assertRaises(ValueError):
+            BeaconFilter(foo="bar")
+
+    def test_partial_match(self):
+        beacon = self.beacon
+        f = BeaconFilter(uuid="1234", minor=2)
+        self.assertFalse(f.match(beacon))
 
 
 if __name__ == "__main__":
