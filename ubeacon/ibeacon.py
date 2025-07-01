@@ -15,6 +15,8 @@ from . import (
     ADV_TYPE_MFG_DATA,
 )
 
+# The beacon device manufacturer's company identifier code.
+IBEACON_COMPANY_ID = const(0x004C)
 
 # iBeacon advertisement code
 _DEVICE_TYPE = const(0x0215)
@@ -30,9 +32,6 @@ _REFERENCE_RSSI = const(-70)
 
 
 class IBeacon(Beacon):
-    # The beacon device manufacturer's company identifier code.
-    company_id = const(0x004C)
-
     def __init__(
         self,
         uuid=None,  # c9ae8912-0c99-471d-ac77-d013f4956c33
@@ -65,7 +64,7 @@ class IBeacon(Beacon):
             _ADV_LENGTH,
             ADV_TYPE_MFG_DATA,
         ))
-        adv.extend(pack("<H", self.company_id))
+        adv.extend(pack("<H", IBEACON_COMPANY_ID))
         adv.extend(pack(">H", _DEVICE_TYPE))
         adv.extend(self.validate(self.uuid_to_bin(self.uuid), 16))
         adv.extend(self.validate(pack(">H", self.major), 2))

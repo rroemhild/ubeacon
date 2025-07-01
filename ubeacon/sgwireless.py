@@ -9,6 +9,9 @@ from struct import unpack
 from . import Beacon
 
 
+# The beacon device manufacturer's company identifier code.
+SGWIRELESS_COMPANY_ID = const(0x0059)
+
 # Length of the data frame from the manufacturer specific ADV data structure.
 # _ADV_LENGTH = const(0x0b)
 
@@ -17,9 +20,6 @@ _DATA_LENGTH = const(0x08)
 
 
 class SGWirelessCAPT(Beacon):
-    # The beacon device manufacturer's company identifier code.
-    company_id = const(0x0059)
-
     def __init__(self, *, data=None):
         self.temperature = None
 

@@ -8,6 +8,8 @@ from struct import unpack
 
 from . import Beacon
 
+# The beacon device manufacturer's company identifier code.
+MIKROTIK_COMPANY_ID = const(0x094F)
 
 # Length of the data frame from the manufacturer specific ADV data structure.
 # _ADV_LENGTH = const(0x15)
@@ -17,9 +19,6 @@ _DATA_LENGTH = const(0x12)
 
 
 class MikroTik(Beacon):
-    # The beacon device manufacturer's company identifier code.
-    company_id = const(0x094F)
-
     def __init__(self, *, data=None):
         self.temperature = None
 

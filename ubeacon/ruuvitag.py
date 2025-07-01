@@ -8,6 +8,10 @@ from struct import unpack
 
 from . import Beacon
 
+
+# The beacon device manufacturer's company identifier code.
+RUUVITAG_COMPANY_ID = const(0x0499)
+
 # RuuviTag data formats
 _DATA_FORMAT_3 = const(0x03)
 _DATA_FORMAT_5 = const(0x05)
@@ -18,9 +22,6 @@ _DATA_LENGTH_5 = const(0x18)
 
 
 class RuuviTag(Beacon):
-    # The beacon device manufacturer's company identifier code.
-    company_id = const(0x0499)
-
     def __init__(self, *, data):
         # If adv_data is provided, decode it to initialize the beacon
         if data:

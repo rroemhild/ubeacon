@@ -15,13 +15,13 @@ from . import (
     ADV_TYPE_MFG_DATA,
 )
 
+# AltBeacon advertisement type code.
+# ALTBEACON_DEVICE_TYPE = bytes([0xBE, 0xAC])
+ALTBEACON_DEVICE_TYPE = const(0xBEAC)
 
 # Beacon device manufacturer's company identifier code.
 # Default for AltBeacon is Radius Networks, Inc.
 _COMPANY_ID = const(0x0118)
-
-# AltBeacon advertisement code
-_DEVICE_TYPE = const(0xBEAC)
 
 # Length of the data frame from the manufacturer specific ADV data structure.
 _ADV_LENGTH = const(0x1B)
@@ -75,7 +75,7 @@ class AltBeacon(Beacon):
             ADV_TYPE_MFG_DATA,
         ))
         adv.extend(pack("<H", self.company_id))
-        adv.extend(pack(">H", _DEVICE_TYPE))
+        adv.extend(pack(">H", ALTBEACON_DEVICE_TYPE))
         adv.extend(self.validate(self.uuid_to_bin(self.uuid), 16))
         adv.extend(self.validate(pack(">H", self.major), 2))
         adv.extend(self.validate(pack(">H", self.minor), 2))

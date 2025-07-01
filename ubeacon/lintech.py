@@ -15,6 +15,8 @@ from . import (
     ADV_TYPE_MFG_DATA,
 )
 
+# The beacon device manufacturer's company identifier code.
+LINTECH_COMPANY_ID = const(0x0144)
 
 # LinTech beacon advertisement code
 _DEVICE_TYPE = const(0xFF03)  # bytes([0xFF, 0x03])
@@ -36,9 +38,6 @@ _TX_BAT_STATUS = const(0xFC)
 
 
 class LinTechBeacon(Beacon):
-    # The beacon device manufacturer's company identifier code.
-    company_id = const(0x0144)
-
     def __init__(
         self,
         uuid=_PROXIMITY_UUID,  # 16-bytes
@@ -71,7 +70,7 @@ class LinTechBeacon(Beacon):
             _ADV_LENGTH,
             ADV_TYPE_MFG_DATA,
         ))
-        adv.extend(pack("<H", self.company_id))
+        adv.extend(pack("<H", LINTECH_COMPANY_ID))
         adv.extend(pack(">H", _DEVICE_TYPE))
         adv.extend(self.validate(self.uuid_to_bin(self.uuid), 16))
         adv.extend(self.validate(pack(">H", self.major), 2))

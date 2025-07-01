@@ -24,22 +24,19 @@ Initialization:
 
 import aioble
 import asyncio
-import bluetooth
 
-from ubeacon.ibeacon import IBeacon
-from ubeacon.lintech import LinTechBeacon
-from ubeacon.mikrotik import MikroTik
-from ubeacon.ruuvitag import RuuviTag
-from ubeacon.altbeacon import AltBeacon
-from ubeacon.eddystone import EddystoneUID, EddystoneURL
-from ubeacon.sgwireless import SGWirelessCAPT
+from bluetooth import UUID
 
-# Beacon advertisement codes
-_ALTBEACON_DEVICE_TYPE = bytes([0xBE, 0xAC])
-_EDDYSTONE_UUID = bluetooth.UUID(0xFEAA)
-_EDDYSTONE_UID = const(0x00)
-_EDDYSTONE_URL = const(0x10)
+from ubeacon.ibeacon import IBeacon, IBEACON_COMPANY_ID
+from ubeacon.lintech import LinTechBeacon, LINTECH_COMPANY_ID
+from ubeacon.mikrotik import MikroTik, MIKROTIK_COMPANY_ID
+from ubeacon.ruuvitag import RuuviTag, RUUVITAG_COMPANY_ID
+from ubeacon.altbeacon import AltBeacon, ALTBEACON_DEVICE_TYPE
+from ubeacon.eddystone import EddystoneUID, EddystoneURL, EDDYSTONE_UUID, EDDYSTONE_FRAME_TYPE_UID, EDDYSTONE_FRAME_TYPE_URL
+from ubeacon.sgwireless import SGWirelessCAPT, SGWIRELESS_COMPANY_ID
 
+
+_EDDYSTONE_UUID = UUID(0xFEAA)
 _SCAN_DURATION_MS = const(0)
 
 
@@ -49,32 +46,32 @@ async def scan():
     ) as scanner:
         async for result in scanner:
             beacon = False
-
+            # Check for Eddystone beacons
             if _EDDYSTONE_UUID in result.services():
                 frame_type = result.adv_data[8]
-                if frame_type == _EDDYSTONE_UID:
+                if frame_type == EDDYSTONE_FRAME_TYPE_UID:
                     beacon = EddystoneUID(adv_data=result.adv_data)
-                elif frame_type == _EDDYSTONE_URL:
+                elif frame_type == EDDYSTONE_FRAME_TYPE_URL:
                     beacon = EddystoneURL(adv_data=result.adv_data)
             else:
                 for mfg_id, mfg_data in result.manufacturer():
                     # LinTech
-                    if mfg_id == LinTechBeacon.company_id:
+                    if mfg_id == LINTECH_COMPANY_ID:
                         beacon = LinTechBeacon(data=mfg_data)
                     # IBeacon
-                    elif mfg_id == IBeacon.company_id:
+                    elif mfg_id == IBEACON_COMPANY_ID:
                         beacon = IBeacon(data=mfg_data)
                     # RuuviTag
-                    elif mfg_id == RuuviTag.company_id:
+                    elif mfg_id == RUUVITAG_COMPANY_ID:
                         beacon = RuuviTag(data=mfg_data)
                     # MikroTik
-                    elif mfg_id == MikroTik.company_id:
+                    elif mfg_id == MIKROTIK_COMPANY_ID:
                         beacon = MikroTik(data=mfg_data)
                     # SGWirelessCAPT
-                    elif mfg_id == SGWirelessCAPT.company_id:
+                    elif mfg_id == SGWIRELESS_COMPANY_ID:
                         beacon = SGWirelessCAPT(data=mfg_data)
                     # AltBeacon
-                    elif mfg_data[:2] == _ALTBEACON_DEVICE_TYPE:
+                    elif int.from_bytes(mfg_data[:2]) == ALTBEACON_DEVICE_TYPE:
                         beacon = AltBeacon(company_id=mfg_id, data=mfg_data)
             if beacon:
                 print(f"MAC: {result.device.addr_hex()}, Beacon: {beacon,!r}")

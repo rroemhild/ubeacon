@@ -16,11 +16,12 @@ _REFERENCE_RSSI = const(-70)
 _SERVICE_LENGTH = const(0x03)
 _SERVICE_UUID_TYPES = const(0x03)
 
-_EDDYSTONE_UUID = const(0xFEAA)
+EDDYSTONE_FRAME_TYPE_UID = const(0x00)
+EDDYSTONE_FRAME_TYPE_URL = const(0x10)
+
+_EDDYSTONE_COMPANY_ID = const(0xFEAA)
 _EDDYSTONE_FRAME_LENGTH = const(0x17)
 _EDDYSTONE_FRAME_LENGTH_LEGACY = const(0x15)
-_EDDYSTONE_FRAME_TYPE_UID = const(0x00)
-_EDDYSTONE_FRAME_TYPE_URL = const(0x10)
 _EDDYSTONE_RESERVED = const(0x00)
 _EDDYSTONE_SERVICE_DATA = const(0x16)
 
@@ -77,11 +78,11 @@ class EddystoneUID(Beacon):
             _SERVICE_LENGTH,
             _SERVICE_UUID_TYPES,
         ))
-        adv.extend(pack("<H", _EDDYSTONE_UUID))
+        adv.extend(pack("<H", _EDDYSTONE_COMPANY_ID))
         adv.append(_EDDYSTONE_FRAME_LENGTH)
         adv.append(_EDDYSTONE_SERVICE_DATA)
-        adv.extend(pack("<H", _EDDYSTONE_UUID))
-        adv.append(_EDDYSTONE_FRAME_TYPE_UID)
+        adv.extend(pack("<H", _EDDYSTONE_COMPANY_ID))
+        adv.append(EDDYSTONE_FRAME_TYPE_UID)
         adv.extend(self.validate(pack(">b", self.reference_rssi), 1))
         adv.extend(self.validate(unhexlify(self.namespace), 10))
         adv.extend(self.validate(unhexlify(self.instance), 6))
@@ -141,11 +142,11 @@ class EddystoneURL(Beacon):
             _SERVICE_LENGTH,
             _SERVICE_UUID_TYPES,
         ])
-        adv.extend(pack("<H", _EDDYSTONE_UUID))
+        adv.extend(pack("<H", _EDDYSTONE_COMPANY_ID))
         adv.append(url_frame_length)
         adv.append(_EDDYSTONE_SERVICE_DATA)
-        adv.extend(pack("<H", _EDDYSTONE_UUID))
-        adv.append(_EDDYSTONE_FRAME_TYPE_URL)
+        adv.extend(pack("<H", _EDDYSTONE_COMPANY_ID))
+        adv.append(EDDYSTONE_FRAME_TYPE_URL)
         adv.extend(self.validate(pack(">b", self.reference_rssi), 1))
         adv.append(url_scheme)
         adv.extend(url)
